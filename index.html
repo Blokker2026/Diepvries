@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>VoorraadBox</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f4f7f8;
+        color: #18323a;
+    }
+
+    .app {
+        max-width: 520px;
+        margin: 0 auto;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .header {
+        text-align: center;
+        padding: 18px 10px 25px;
+    }
+
+    .logo {
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 12px;
+        border-radius: 20px;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        font-size: 38px;
+    }
+
+    h1 {
+        margin: 0;
+        font-size: 30px;
+        font-weight: 700;
+    }
+
+    .subtitle {
+        margin-top: 6px;
+        color: #6d7d82;
+        font-size: 15px;
+    }
+
+    .main-button {
+        width: 100%;
+        border: none;
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 14px;
+        background: white;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.07);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        text-align: left;
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .main-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.10);
+    }
+
+    .main-button:active {
+        transform: scale(0.98);
+    }
+
+    .icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 17px;
+        background: #e8f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 29px;
+        margin-right: 16px;
+        flex-shrink: 0;
+    }
+
+    .button-text {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .button-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .button-description {
+        font-size: 13px;
+        color: #7b898d;
+    }
+
+    .scan {
+        background: #18323a;
+        color: white;
+    }
+
+    .scan .icon {
+        background: rgba(255,255,255,0.14);
+    }
+
+    .scan .button-description {
+        color: #c8d5d8;
+    }
+
+    .section-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #829095;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 28px 4px 12px;
+    }
+
+    .footer {
+        text-align: center;
+        color: #9aa7aa;
+        font-size: 12px;
+        padding: 30px 0 20px;
+    }
+
+    /* Meldingen */
+    .message {
+        display: none;
+        background: white;
+        border-radius: 18px;
+        padding: 20px;
+        margin-top: 15px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.07);
+        text-align: center;
+    }
+
+    .message button {
+        margin-top: 15px;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 20px;
+        background: #18323a;
+        color: white;
+        cursor: pointer;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <div class="header">
+
+        <div class="logo">
+            📦
+        </div>
+
+        <h1>VoorraadBox</h1>
+
+        <div class="subtitle">
+            Jouw digitale voorraadkast
+        </div>
+
+    </div>
+
+
+    <!-- QR SCANNEN -->
+
+    <button class="main-button scan" onclick="showMessage('QR-scanner')">
+
+        <div class="icon">
+            📷
+        </div>
+
+        <div class="button-text">
+
+            <div class="button-title">
+                QR-code scannen
+            </div>
+
+            <div class="button-description">
+                Scan een doos en bekijk de voorraad
+            </div>
+
+        </div>
+
+    </button>
+
+
+    <div class="section-title">
+        Voorraad beheren
+    </div>
+
+
+    <!-- VOORRAAD -->
+
+    <button class="main-button" onclick="showMessage('Voorraad')">
+
+        <div class="icon">
+            📦
+        </div>
+
+        <div class="button-text">
+
+            <div class="button-title">
+                Voorraad
+            </div>
+
+            <div class="button-description">
+                Bekijk alle dozen en producten
+            </div>
+
+        </div>
+
+    </button>
+
+
+    <!-- NIEUWE DOOS -->
+
+    <button class="main-button" onclick="showMessage('Nieuwe doos')">
+
+        <div class="icon">
+            ➕
+        </div>
+
+        <div class="button-text">
+
+            <div class="button-title">
+                Nieuwe doos
+            </div>
+
+            <div class="button-description">
+                Voeg een nieuwe voorraadbox toe
+            </div>
+
+        </div>
+
+    </button>
+
+
+    <!-- QR CODES -->
+
+    <button class="main-button" onclick="showMessage('QR-codes')">
+
+        <div class="icon">
+            🖨️
+        </div>
+
+        <div class="button-text">
+
+            <div class="button-title">
+                QR-codes
+            </div>
+
+            <div class="button-description">
+                Maak en print QR-codes voor dozen
+            </div>
+
+        </div>
+
+    </button>
+
+
+    <div id="message" class="message">
+
+        <strong id="messageTitle"></strong>
+
+        <p>
+            Deze functie gaan we binnenkort bouwen.
+        </p>
+
+        <button onclick="closeMessage()">
+            Terug
+        </button>
+
+    </div>
+
+
+    <div class="footer">
+        VoorraadBox • versie 0.1
+    </div>
+
+</div>
+
+
+<script>
+
+function showMessage(name) {
+
+    document.getElementById("messageTitle").innerText = name;
+
+    document.getElementById("message").style.display = "block";
+
+    window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth"
+    });
+
+}
+
+function closeMessage() {
+
+    document.getElementById("message").style.display = "none";
+
+}
+
+</script>
+
+</body>
+</html>
