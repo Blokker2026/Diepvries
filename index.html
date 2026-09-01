@@ -778,13 +778,15 @@ async function saveBox() {
     // 1. DOOS OPSLAAN IN SUPABASE
     // -----------------------------
 
-    const { error: doosError } = await voorraadDb
-        .from("dozen")
-        .insert({
-            doosnummer: boxId,
-            locatie: locatie,
-            notitie: doosNotitie
-        });
+    const { data: opgeslagenDoos, error: doosError } = await voorraadDb
+    .from("dozen")
+    .insert({
+        doosnummer: boxId,
+        locatie: locatie,
+        notitie: doosNotitie
+    })
+    .select()
+    .single();
 
     if (doosError) {
 
@@ -796,6 +798,11 @@ async function saveBox() {
         console.log("Fout bij doos opslaan:", doosError);
         return;
     }
+    alert(
+    "Supabase heeft de doos opgeslagen ✅\n\n" +
+    "ID: " + opgeslagenDoos.id + "\n" +
+    "Doosnummer: " + opgeslagenDoos.doosnummer
+);
 
     // -----------------------------
     // 2. PRODUCTEN VERZAMELEN
