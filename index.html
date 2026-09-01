@@ -755,7 +755,7 @@ function getToday() {
 
 /* OPSLAAN */
 
-function saveBox() {
+async function saveBox() {
 
     const boxId =
         document.getElementById("boxId").value.trim();
@@ -765,75 +765,123 @@ function saveBox() {
         return;
     }
 
+    const locatie =
+        document.getElementById("location").value;
+
+    const doosNotitie =
+        document.getElementById("boxNote").value;
+
     const productCards =
         document.querySelectorAll(".product-card");
 
-    const products = [];
+    // -----------------------------
+    // 1. DOOS OPSLAAN IN SUPABASE
+    // -----------------------------
+
+    const { error: doosError } = await voorraadDb
+        .from("dozen")
+        .insert({
+            doosnummer: boxId,
+            locatie: locatie,
+            notitie: doosNotitie
+        });
+
+    if (doosError) {
+
+        alert(
+            "De doos kon niet worden opgeslagen:\n\n" +
+            doosError.message
+        );
+
+        console.log("Fout bij doos opslaan:", doosError);
+        return;
+    }
+
+    // -----------------------------
+    // 2. PRODUCTEN VERZAMELEN
+    // -----------------------------
+
+    const producten = [];
 
     productCards.forEach(card => {
 
-        products.push({
+        const naam =
+            card.querySelector(".product-name").value.trim();
 
-            name:
-            card.querySelector(".product-name").value,
+        // Lege productregels niet opslaan
+        if (!naam) {
+            return;
+        }
 
-            portions:
-            card.querySelector(".product-portions").value,
+        const porties =
+            card.querySelector(".product-portions").value;
 
-            weight:
-            card.querySelector(".product-weight").value,
+        const gewicht =
+            card.querySelector(".product-weight").value;
 
-            freeze:
-            card.querySelector(".product-freeze").value,
+        const invriesdatum =
+            card.querySelector(".product-freeze").value;
 
-            expiry:
-            card.querySelector(".product-expiry").value,
+        const houdbaarTot =
+            card.querySelector(".product-expiry").value;
 
-            note:
-            card.querySelector(".product-note").value
+        const notitie =
+            card.querySelector(".product-note").value;
 
+        producten.push({
+            doosnummer: boxId,
+            Naam: naam,
+            porties: porties ? Number(porties) : null,
+            gewicht: gewicht ? Number(gewicht) : null,
+            invriesdatum: invriesdatum || null,
+            houdbaar_tot: houdbaarTot || null,
+            notitie: notitie
         });
-
     });
 
+    // -----------------------------
+    // 3. PRODUCTEN OPSLAAN
+    // -----------------------------
 
-    const box = {
+    if (producten.length > 0) {
 
-        boxId: boxId,
+        const { error: productError } = await voorraadDb
+            .from("Producten")
+            .insert(producten);
 
-        location:
-        document.getElementById("location").value,
+        if (productError) {
 
-        note:
-        document.getElementById("boxNote").value,
+            alert(
+                "De doos is opgeslagen, maar de producten niet:\n\n" +
+                productError.message
+            );
 
-        products: products,
+            console.log(
+                "Fout bij producten opslaan:",
+                productError
+            );
 
-        updated:
-        new Date().toISOString()
+            return;
+        }
+    }
 
-    };
-
-
-    localStorage.setItem(
-        "voorraadbox_" + boxId,
-        JSON.stringify(box)
-    );
-
+    // -----------------------------
+    // 4. BEVESTIGING TONEN
+    // -----------------------------
 
     const status =
-    document.getElementById("saveStatus");
+        document.getElementById("saveStatus");
 
-status.classList.add("visible");
+    status.classList.add("visible");
 
-status.scrollIntoView({
-    behavior: "smooth",
-    block: "center"
-});
+    status.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
 
-setTimeout(() => {
-    status.classList.remove("visible");
-}, 3500);
+    setTimeout(() => {
+        status.classList.remove("visible");
+    }, 3500);
 }
 
 
