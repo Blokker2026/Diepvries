@@ -340,7 +340,7 @@ textarea {
 
     <div class="section-title">Voorraad beheren</div>
 
-    <button class="main-button" onclick="comingSoon('Voorraad')">
+  <button class="main-button" onclick="openVoorraad()">
         <div class="icon">📦</div>
         <div>
             <div class="button-title">Voorraad</div>
@@ -369,7 +369,7 @@ textarea {
             </div>
         </div>
     </button>
-<!-- gewone knoppen van VoorraadBox hierboven -->
+<!-- gewone knoppen van Voorraad hierboven -->
 
 
 <!-- TIJDELIJKE DATABASE TESTKNOP -->
@@ -390,10 +390,35 @@ textarea {
 
 <!-- NIEUWE DOOS -->
 
+<!-- ============================= -->
+<!-- SCHERM: VOORRAAD -->
+<!-- ============================= -->
+
+<div id="screen-voorraad" class="screen">
+
+    <div class="topbar">
+        <button class="back-button" onclick="goHome()">←</button>
+
+        <div>
+            <h2>Mijn voorraad</h2>
+            <div class="subtitle">Alle dozen en producten</div>
+        </div>
+    </div>
+
+    <div id="voorraad-loading" class="card">
+        Voorraad wordt geladen...
+    </div>
+
+    <div id="voorraad-lijst"></div>
+
+</div>
+
+
+<!-- NIEUWE DOOS -->
+
 <div id="boxScreen" class="screen">
 
     <button class="back-button" onclick="goHome()">← Terug</button>
-
     <h2 class="title">📦 Voorraadbox</h2>
 
     <div class="help">
@@ -546,7 +571,76 @@ function showScreen(id) {
 function goHome() {
     showScreen("homeScreen");
 }
+async function openVoorraad() {
 
+    showScreen("screen-voorraad");
+
+    const loading =
+        document.getElementById("voorraad-loading");
+
+    const lijst =
+        document.getElementById("voorraad-lijst");
+
+    loading.style.display = "block";
+    lijst.innerHTML = "";
+
+    const { data: dozen, error } = await voorraadDb
+        .from("dozen")
+        .select("*")
+        .order("doosnummer", { ascending: true });
+
+    if (error) {
+
+        loading.innerHTML =
+            "Er ging iets mis bij het laden van de voorraad.";
+
+        console.log(error);
+        return;
+    }
+
+    loading.style.display = "none";
+
+    if (!dozen || dozen.length === 0) {
+
+        lijst.innerHTML = `
+            <div class="card">
+                <strong>Nog geen dozen gevonden.</strong>
+                <br><br>
+                Voeg eerst een nieuwe doos toe.
+            </div>
+        `;
+
+        return;
+    }
+
+    dozen.forEach(doos => {
+
+        const kaart =
+            document.createElement("div");
+
+        kaart.className = "card";
+
+        kaart.innerHTML = `
+            <div style="font-size:20px;font-weight:700;margin-bottom:8px;">
+                📦 ${doos.doosnummer || "Onbekende doos"}
+            </div>
+
+            <div style="margin-bottom:6px;">
+                📍 ${doos.locatie || "Geen locatie"}
+            </div>
+
+            <div style="margin-bottom:6px;">
+                Status: ${doos.status || "actief"}
+            </div>
+
+            <div style="color:#718187;font-size:14px;">
+                ${doos.notitie || ""}
+            </div>
+        `;
+
+        lijst.appendChild(kaart);
+    });
+}
 
 /* NIEUWE DOOS */
 
