@@ -714,13 +714,18 @@ function saveBox() {
 
 
     const status =
-        document.getElementById("saveStatus");
+    document.getElementById("saveStatus");
 
-    status.classList.add("visible");
+status.classList.add("visible");
 
-    setTimeout(() => {
-        status.classList.remove("visible");
-    }, 2500);
+status.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+});
+
+setTimeout(() => {
+    status.classList.remove("visible");
+}, 3500);
 }
 
 
