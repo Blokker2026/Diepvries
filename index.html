@@ -369,7 +369,21 @@ textarea {
             </div>
         </div>
     </button>
+<!-- gewone knoppen van VoorraadBox hierboven -->
 
+
+<!-- TIJDELIJKE DATABASE TESTKNOP -->
+<button class="main-button" onclick="testSupabaseVerbinding()">
+    <div class="icon">☁️</div>
+    <div>
+        <div class="button-title">Database testen</div>
+        <div class="button-description">
+            Controleer de verbinding met Supabase
+        </div>
+    </div>
+</button>
+
+   
     <div class="footer">VoorraadBox • versie 0.4</div>
 </div>
 
@@ -972,6 +986,29 @@ const voorraadDb = supabase.createClient(
     SUPABASE_KEY
 );
 
+async function testSupabaseVerbinding() {
+
+    const { data, error } = await voorraadDb
+        .from("dozen")
+        .select("*")
+        .limit(1);
+
+    if (error) {
+        alert(
+            "Verbinding met Supabase mislukt:\n\n" +
+            error.message
+        );
+        console.log(error);
+        return;
+    }
+
+    alert(
+        "Verbinding met Supabase werkt! ✅"
+    );
+
+    console.log("Supabase test:", data);
+}
+    
 /* TIJDELIJK */    
 
 function comingSoon(name) {
