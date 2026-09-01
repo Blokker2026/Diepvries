@@ -1,173 +1,719 @@
+dit zie ik
+vandaag 13:55
+
+Geen probleem 👍 je hoeft de screenshot niet opnieuw te uploaden. Ik weet waar we zijn gebleven.
+
+Die melding:
+
+“Kan 0f82...png niet uploaden. Maximaal 0 uploads tegelijk”
+
+is een probleem met het uploaden van de afbeelding in deze chat. Het heeft niets met GitHub of VoorraadBox te maken. We kunnen gewoon verder.
+
+🚀 Ga verder met Stap 3.5
+
+Je zit in GitHub bij Diepvries.
+
+Klik bovenaan op:
+
+⚙️ Instellingen
+
+Daarna:
+
+Pagina's
+
+Zoek vervolgens naar:
+
+Build and deployment
+
+Bij Source kies je:
+
+Deploy from a branch
+
+Daaronder:
+
+Branch: voornaamst
+
+en:
+
+Folder: / (root)
+
+Daarna klik je op:
+
+Save
+🛑 Daarna even stoppen
+
+Als je op Save hebt gedrukt, kijk dan wat er op het scherm verschijnt.
+
+Je hoeft geen screenshot te sturen als uploaden niet lukt.
+
+Typ gewoon bijvoorbeeld wat je ziet, zoals:
+
+"Ik zie nu Your site is live..."
+
+of
+
+"Ik zie een foutmelding..."
+
+Dan vertel ik je precies wat je vervolgens moet doen.
+
+We gaan rustig één stap tegelijk. 👍
+
+En zodra GitHub Pages werkt, openen we jouw eerste echte VoorraadBox in de browser. 📦🚀
+
+Advertentie
+Je website is live te vinden op https://blokker2026.github.io/Diepvries/
+
+🎉 Yes! Hij staat live. Ik heb jouw website ook daadwerkelijk geopend en gecontroleerd: de pagina VoorraadBox komt online goed binnen en de vier hoofdknoppen staan erop.
+
+We hebben dus onze eerste echte mijlpaal bereikt:
+
+GitHub → VoorraadBox → online website → werkt. 🚀
+
+📷 Stap 3.6 — Nu maken we de QR-scanner echt
+
+Dit is het eerste onderdeel dat ik echt wil laten werken.
+
+We gaan een QR-scanner toevoegen die de camera van je telefoon gebruikt. Daarvoor gebruiken we een gratis open-source bibliotheek die speciaal hiervoor gemaakt is. Die ondersteunt camera-scanning op Android en iOS en kan rechtstreeks vanuit een gewone webpagina worden gebruikt.
+
+Omdat onze GitHub Pages-site via HTTPS draait, kunnen we cameratoegang gebruiken. De scanner vraagt op de telefoon toestemming voor de camera.
+
+Wat we straks krijgen
+
+Je drukt op:
+
+📷 QR-CODE SCANNEN
+
+Dan verschijnt:
+
+┌─────────────────────────────┐
+│                             │
+│       QR-CODE SCANNEN       │
+│                             │
+│    ┌───────────────────┐    │
+│    │                   │    │
+│    │     📷 CAMERA     │    │
+│    │                   │    │
+│    │   ┌───────────┐   │    │
+│    │   │           │   │    │
+│    │   │    QR     │   │    │
+│    │   │           │   │    │
+│    │   └───────────┘   │    │
+│    │                   │    │
+│    └───────────────────┘    │
+│                             │
+│      Richt op de QR-code    │
+│                             │
+└─────────────────────────────┘
+
+En zodra hij bijvoorbeeld DOOS-0001 leest:
+
+✅ QR-code gevonden
+
+DOOS-0001
+
+Dat is nog niet de voorraad zelf. Dat koppelen we daarna aan de database.
+
+🛠️ Wat jij nu moet doen
+
+We gaan index.html aanpassen.
+
+1. Ga terug naar jouw GitHub-project
+
+Je zit daar waarschijnlijk nog.
+
+Open:
+
+Diepvries → index.html
+
+2. Klik rechtsboven op het potloodje ✏️
+
+Daarmee kunnen we het bestand bewerken.
+
+3. Verwijder de huidige inhoud
+
+We gaan de eerste versie vervangen door een verbeterde versie waarin de QR-scanner al ingebouwd zit.
+
+Maar wacht nog even met plakken.
+
+Ik wil dit namelijk in één keer goed doen, zodat we niet straks drie keer hetzelfde bestand moeten vervangen.
+
+🔧 Eén belangrijke verbetering die ik meteen wil maken
+
+Je had aangegeven dat je mooie, herkenbare knoppen met iconen wilt.
+
+Daarom wil ik nu meteen stoppen met de tijdelijke emoji-iconen zoals:
+
+📦 📷 ➕ 🖨️
+
+en overstappen naar echte moderne pictogrammen.
+
+Bijvoorbeeld:
+
+QR-scanner → echt QR/camera-pictogram
+Voorraad → doos/pakket-pictogram
+Nieuwe doos → plus in doos
+QR-codes → QR-pictogram
+Geschiedenis → klok/geschiedenis
+Instellingen → tandwiel
+
+Zo krijgt VoorraadBox een veel professionelere uitstraling.
+
+Dus onze volgende versie wordt:
+
+VoorraadBox 0.2
+
+met:
+
+✅ modernere interface
+✅ echte pictogrammen
+✅ QR-scanner
+✅ mobiel ontwerp
+✅ terugknop
+✅ duidelijke scanmelding
+✅ basis voor onze toekomstige doosgegevens
+
+🛑 Doe daarom nu nog niets
+
+Je hoeft alleen maar naar index.html → potloodje te gaan.
+
+Als je daar weer het grote codeveld ziet, zeg je:
+
+"Ik ben weer bij de code."
+
+Dan geef ik je de volgende complete versie om één keer te kopiëren en te plakken.
+
+Daarna gaan we voor het eerst met je telefoon een echte QR-code scannen. 📱➡️📦
+
+ik ben weer bij de code
+
+Perfect. 👍 Dan gaan we nu VoorraadBox 0.2 maken.
+
+Deze versie krijgt meteen een veel professionelere uitstraling én de eerste echte QR-scanner. Ik heb de scanner gecontroleerd: de gebruikte html5-qrcode-bibliotheek ondersteunt camera-scanning op Android, iPhone en desktopbrowsers en kan rechtstreeks via een script in onze webpagina worden geladen.
+
+🚀 Wat je nu gaat doen
+
+We gaan het volledige huidige bestand index.html vervangen.
+
+Dat klinkt misschien eng, maar dat is het niet. We bewaren de huidige versie in GitHub als eerdere commit. Mocht er iets misgaan, kunnen we altijd terug.
+
+Stap 3.6A — Alles selecteren
+
+Je staat nu in het grote codeveld.
+
+Klik ergens in de code.
+Druk op Ctrl + A
+Druk op Delete
+
+Het grote veld moet daarna leeg zijn.
+
+Stap 3.6B — Nieuwe VoorraadBox-code plakken
+
+Kopieer alles hieronder en plak het in het lege codeveld.
+
 <!DOCTYPE html>
 <html lang="nl">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>VoorraadBox</title>
 
 <style>
-    * {
-        box-sizing: border-box;
-    }
 
-    body {
-        margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        background: #f4f7f8;
-        color: #18323a;
-    }
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f3f7f8;
+    color: #18323a;
+}
+
+.app {
+    max-width: 520px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding: 18px;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.header {
+    text-align: center;
+    padding: 18px 10px 28px;
+}
+
+.logo {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 12px;
+    border-radius: 22px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+.logo svg {
+    width: 40px;
+    height: 40px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 750;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    margin-top: 6px;
+    color: #708187;
+    font-size: 15px;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.main-button {
+    width: 100%;
+    border: none;
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 13px;
+
+    background: white;
+
+    box-shadow:
+        0 5px 16px rgba(0,0,0,0.06);
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+
+    text-align: left;
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.main-button:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 10px 24px rgba(0,0,0,0.10);
+}
+
+.main-button:active {
+    transform: scale(0.98);
+}
+
+.icon {
+    width: 58px;
+    height: 58px;
+
+    border-radius: 17px;
+
+    background: #e8f2f4;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-right: 16px;
+
+    flex-shrink: 0;
+}
+
+.icon svg {
+    width: 29px;
+    height: 29px;
+    stroke: #18323a;
+}
+
+.button-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.button-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.button-description {
+    font-size: 13px;
+    color: #7b898d;
+    line-height: 1.3;
+}
+
+/* =========================
+   SCAN BUTTON
+========================= */
+
+.scan {
+    background: #18323a;
+    color: white;
+}
+
+.scan .icon {
+    background: rgba(255,255,255,0.13);
+}
+
+.scan .icon svg {
+    stroke: white;
+}
+
+.scan .button-description {
+    color: #cbd7da;
+}
+
+/* =========================
+   SECTION
+========================= */
+
+.section-title {
+    font-size: 13px;
+    font-weight: 700;
+
+    color: #829095;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+
+    margin:
+        27px 4px
+        11px;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.footer {
+    text-align: center;
+
+    color: #9aa7aa;
+
+    font-size: 12px;
+
+    padding:
+        25px 0
+        20px;
+}
+
+/* =========================
+   SCANNER SCREEN
+========================= */
+
+.screen {
+    display: none;
+}
+
+.screen.active {
+    display: block;
+}
+
+.back-button {
+    border: none;
+    background: white;
+
+    border-radius: 14px;
+
+    padding: 11px 15px;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    color: #18323a;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 4px 12px rgba(0,0,0,0.06);
+
+    margin-bottom: 20px;
+}
+
+.back-button svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* =========================
+   SCANNER
+========================= */
+
+.scanner-title {
+    text-align: center;
+
+    font-size: 24px;
+
+    margin:
+        5px 0
+        7px;
+}
+
+.scanner-text {
+    text-align: center;
+
+    color: #718187;
+
+    font-size: 14px;
+
+    margin-bottom: 20px;
+}
+
+.scanner-box {
+    background: #ffffff;
+
+    border-radius: 24px;
+
+    padding: 14px;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.08);
+}
+
+#reader {
+    width: 100%;
+}
+
+#reader video {
+    border-radius: 17px;
+}
+
+.scan-result {
+    display: none;
+
+    margin-top: 18px;
+
+    background: #e8f5ed;
+
+    border-radius: 18px;
+
+    padding: 18px;
+
+    text-align: center;
+}
+
+.scan-result.visible {
+    display: block;
+}
+
+.result-icon {
+    width: 50px;
+    height: 50px;
+
+    border-radius: 50%;
+
+    background: #d1ebdb;
+
+    margin: 0 auto 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.result-icon svg {
+    width: 26px;
+    height: 26px;
+    stroke: #237447;
+}
+
+.result-title {
+    font-size: 15px;
+
+    color: #397052;
+
+    margin-bottom: 5px;
+}
+
+.result-code {
+    font-size: 24px;
+
+    font-weight: 750;
+
+    color: #18323a;
+}
+
+.continue-button {
+    width: 100%;
+
+    border: none;
+
+    border-radius: 15px;
+
+    padding: 15px;
+
+    margin-top: 14px;
+
+    background: #18323a;
+
+    color: white;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 400px) {
 
     .app {
-        max-width: 520px;
-        margin: 0 auto;
-        min-height: 100vh;
-        padding: 20px;
-    }
-
-    .header {
-        text-align: center;
-        padding: 18px 10px 25px;
-    }
-
-    .logo {
-        width: 70px;
-        height: 70px;
-        margin: 0 auto 12px;
-        border-radius: 20px;
-        background: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-        font-size: 38px;
+        padding: 14px;
     }
 
     h1 {
-        margin: 0;
-        font-size: 30px;
-        font-weight: 700;
-    }
-
-    .subtitle {
-        margin-top: 6px;
-        color: #6d7d82;
-        font-size: 15px;
-    }
-
-    .main-button {
-        width: 100%;
-        border: none;
-        border-radius: 20px;
-        padding: 20px;
-        margin-bottom: 14px;
-        background: white;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.07);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        text-align: left;
-        transition: transform 0.15s, box-shadow 0.15s;
-    }
-
-    .main-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.10);
-    }
-
-    .main-button:active {
-        transform: scale(0.98);
-    }
-
-    .icon {
-        width: 58px;
-        height: 58px;
-        border-radius: 17px;
-        background: #e8f4f6;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 29px;
-        margin-right: 16px;
-        flex-shrink: 0;
-    }
-
-    .button-text {
-        display: flex;
-        flex-direction: column;
+        font-size: 27px;
     }
 
     .button-title {
-        font-size: 18px;
-        font-weight: 700;
-        margin-bottom: 4px;
+        font-size: 17px;
     }
 
-    .button-description {
-        font-size: 13px;
-        color: #7b898d;
-    }
+}
 
-    .scan {
-        background: #18323a;
-        color: white;
-    }
-
-    .scan .icon {
-        background: rgba(255,255,255,0.14);
-    }
-
-    .scan .button-description {
-        color: #c8d5d8;
-    }
-
-    .section-title {
-        font-size: 14px;
-        font-weight: 700;
-        color: #829095;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin: 28px 4px 12px;
-    }
-
-    .footer {
-        text-align: center;
-        color: #9aa7aa;
-        font-size: 12px;
-        padding: 30px 0 20px;
-    }
-
-    /* Meldingen */
-    .message {
-        display: none;
-        background: white;
-        border-radius: 18px;
-        padding: 20px;
-        margin-top: 15px;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.07);
-        text-align: center;
-    }
-
-    .message button {
-        margin-top: 15px;
-        border: none;
-        border-radius: 12px;
-        padding: 12px 20px;
-        background: #18323a;
-        color: white;
-        cursor: pointer;
-    }
 </style>
+
 </head>
 
 <body>
 
+
+<!-- =========================
+     ICONS
+========================= -->
+
+<svg style="display:none">
+
+    <symbol id="icon-box"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round">
+
+        <path d="M21 8l-9-5-9 5 9 5 9-5z"/>
+        <path d="M3 8v8l9 5 9-5V8"/>
+        <path d="M12 13v8"/>
+
+    </symbol>
+
+
+    <symbol id="icon-camera"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round">
+
+        <path d="M4 7h3l2-3h6l2 3h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"/>
+        <circle cx="12" cy="13" r="4"/>
+
+    </symbol>
+
+
+    <symbol id="icon-plus"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round">
+
+        <path d="M12 5v14"/>
+        <path d="M5 12h14"/>
+
+    </symbol>
+
+
+    <symbol id="icon-qr"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round">
+
+        <rect x="3" y="3" width="6" height="6"/>
+        <rect x="15" y="3" width="6" height="6"/>
+        <rect x="3" y="15" width="6" height="6"/>
+
+        <path d="M15 15h3v3h-3z"/>
+        <path d="M21 15v6"/>
+        <path d="M15 21h3"/>
+
+    </symbol>
+
+
+    <symbol id="icon-arrow"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round">
+
+        <path d="M15 18l-6-6 6-6"/>
+
+    </symbol>
+
+
+    <symbol id="icon-check"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round">
+
+        <path d="M5 12l4 4L19 6"/>
+
+    </symbol>
+
+</svg>
+
+
 <div class="app">
+
+
+<!-- =========================
+     HOME SCREEN
+========================= -->
+
+<div id="homeScreen" class="screen active">
 
     <div class="header">
 
         <div class="logo">
-            📦
+
+            <svg>
+                <use href="#icon-box"></use>
+            </svg>
+
         </div>
 
         <h1>VoorraadBox</h1>
@@ -181,10 +727,16 @@
 
     <!-- QR SCANNEN -->
 
-    <button class="main-button scan" onclick="showMessage('QR-scanner')">
+    <button
+        class="main-button scan"
+        onclick="openScanner()">
 
         <div class="icon">
-            📷
+
+            <svg>
+                <use href="#icon-camera"></use>
+            </svg>
+
         </div>
 
         <div class="button-text">
@@ -209,10 +761,16 @@
 
     <!-- VOORRAAD -->
 
-    <button class="main-button" onclick="showMessage('Voorraad')">
+    <button
+        class="main-button"
+        onclick="comingSoon('Voorraad')">
 
         <div class="icon">
-            📦
+
+            <svg>
+                <use href="#icon-box"></use>
+            </svg>
+
         </div>
 
         <div class="button-text">
@@ -232,10 +790,16 @@
 
     <!-- NIEUWE DOOS -->
 
-    <button class="main-button" onclick="showMessage('Nieuwe doos')">
+    <button
+        class="main-button"
+        onclick="comingSoon('Nieuwe doos')">
 
         <div class="icon">
-            ➕
+
+            <svg>
+                <use href="#icon-plus"></use>
+            </svg>
+
         </div>
 
         <div class="button-text">
@@ -255,10 +819,16 @@
 
     <!-- QR CODES -->
 
-    <button class="main-button" onclick="showMessage('QR-codes')">
+    <button
+        class="main-button"
+        onclick="comingSoon('QR-codes')">
 
         <div class="icon">
-            🖨️
+
+            <svg>
+                <use href="#icon-qr"></use>
+            </svg>
+
         </div>
 
         <div class="button-text">
@@ -276,46 +846,266 @@
     </button>
 
 
-    <div id="message" class="message">
-
-        <strong id="messageTitle"></strong>
-
-        <p>
-            Deze functie gaan we binnenkort bouwen.
-        </p>
-
-        <button onclick="closeMessage()">
-            Terug
-        </button>
-
-    </div>
-
-
     <div class="footer">
-        VoorraadBox • versie 0.1
+
+        VoorraadBox • versie 0.2
+
     </div>
 
 </div>
 
 
+<!-- =========================
+     SCANNER SCREEN
+========================= -->
+
+<div id="scannerScreen" class="screen">
+
+    <button
+        class="back-button"
+        onclick="closeScanner()">
+
+        <svg>
+            <use href="#icon-arrow"></use>
+        </svg>
+
+        Terug
+
+    </button>
+
+
+    <h2 class="scanner-title">
+        QR-code scannen
+    </h2>
+
+
+    <div class="scanner-text">
+
+        Richt de camera op de QR-code
+        op het deksel van de doos.
+
+    </div>
+
+
+    <div class="scanner-box">
+
+        <div id="reader"></div>
+
+    </div>
+
+
+    <div
+        id="scanResult"
+        class="scan-result">
+
+        <div class="result-icon">
+
+            <svg>
+                <use href="#icon-check"></use>
+            </svg>
+
+        </div>
+
+        <div class="result-title">
+            QR-code gevonden
+        </div>
+
+        <div
+            id="resultCode"
+            class="result-code">
+
+        </div>
+
+        <button
+            class="continue-button"
+            onclick="continueToBox()">
+
+            Doos openen
+
+        </button>
+
+    </div>
+
+</div>
+
+
+</div>
+
+
+<!-- QR SCANNER BIBLIOTHEEK -->
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+
 <script>
 
-function showMessage(name) {
+let scanner = null;
+let scannedCode = null;
 
-    document.getElementById("messageTitle").innerText = name;
 
-    document.getElementById("message").style.display = "block";
+/* =========================
+   SCANNER OPENEN
+========================= */
 
-    window.scrollTo({
-        top: document.body.scrollHeight,
-        behavior: "smooth"
+function openScanner() {
+
+    document.getElementById("homeScreen")
+        .classList.remove("active");
+
+    document.getElementById("scannerScreen")
+        .classList.add("active");
+
+    document.getElementById("scanResult")
+        .classList.remove("visible");
+
+    scannedCode = null;
+
+    startScanner();
+
+}
+
+
+/* =========================
+   SCANNER STARTEN
+========================= */
+
+function startScanner() {
+
+    scanner = new Html5Qrcode("reader");
+
+    const config = {
+
+        fps: 10,
+
+        qrbox: {
+            width: 250,
+            height: 250
+        },
+
+        formatsToSupport: [
+            Html5QrcodeSupportedFormats.QR_CODE
+        ]
+
+    };
+
+
+    scanner.start(
+
+        {
+            facingMode: "environment"
+        },
+
+        config,
+
+        function(decodedText) {
+
+            scannedCode = decodedText;
+
+            document.getElementById("resultCode")
+                .innerText = decodedText;
+
+            document.getElementById("scanResult")
+                .classList.add("visible");
+
+
+            scanner.stop()
+                .catch(function(error) {
+
+                    console.log(
+                        "Scanner stoppen:",
+                        error
+                    );
+
+                });
+
+        },
+
+        function(errorMessage) {
+
+            /*
+
+            Scanfouten worden bewust
+            niet op het scherm getoond.
+
+            De scanner probeert gewoon
+            verder.
+
+            */
+
+        }
+
+    ).catch(function(error) {
+
+        alert(
+            "De camera kon niet worden gestart. " +
+            "Controleer of je toestemming hebt gegeven."
+        );
+
+        console.log(error);
+
     });
 
 }
 
-function closeMessage() {
 
-    document.getElementById("message").style.display = "none";
+/* =========================
+   SCANNER SLUITEN
+========================= */
+
+function closeScanner() {
+
+    if (scanner) {
+
+        scanner.stop()
+            .then(function() {
+
+                scanner.clear();
+
+            })
+            .catch(function(error) {
+
+                console.log(error);
+
+            });
+
+    }
+
+
+    document.getElementById("scannerScreen")
+        .classList.remove("active");
+
+    document.getElementById("homeScreen")
+        .classList.add("active");
+
+}
+
+
+/* =========================
+   DOOS OPENEN
+========================= */
+
+function continueToBox() {
+
+    alert(
+        "QR-code gelezen:\n\n" +
+        scannedCode +
+        "\n\nDe koppeling met de voorraad " +
+        "bouwen we in de volgende stap."
+    );
+
+}
+
+
+/* =========================
+   TIJDELIJKE FUNCTIES
+========================= */
+
+function comingSoon(name) {
+
+    alert(
+        name +
+        "\n\nDeze functie gaan we stap voor stap bouwen."
+    );
 
 }
 
