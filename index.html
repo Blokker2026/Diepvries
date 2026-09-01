@@ -7,7 +7,6 @@
 <title>VoorraadBox</title>
 
 <style>
-
 * {
     box-sizing: border-box;
 }
@@ -20,13 +19,19 @@ body {
 }
 
 .app {
-    max-width: 520px;
+    max-width: 560px;
     margin: 0 auto;
     min-height: 100vh;
     padding: 18px;
 }
 
-/* HEADER */
+.screen {
+    display: none;
+}
+
+.screen.active {
+    display: block;
+}
 
 .header {
     text-align: center;
@@ -42,18 +47,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 38px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-}
-
-.logo svg {
-    width: 40px;
-    height: 40px;
 }
 
 h1 {
     margin: 0;
     font-size: 30px;
-    font-weight: 750;
 }
 
 .subtitle {
@@ -61,8 +61,6 @@ h1 {
     color: #708187;
     font-size: 15px;
 }
-
-/* BUTTONS */
 
 .main-button {
     width: 100%;
@@ -76,16 +74,11 @@ h1 {
     display: flex;
     align-items: center;
     text-align: left;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.main-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(0,0,0,0.10);
-}
-
-.main-button:active {
-    transform: scale(0.98);
+.main-button.scan {
+    background: #18323a;
+    color: white;
 }
 
 .icon {
@@ -97,18 +90,11 @@ h1 {
     align-items: center;
     justify-content: center;
     margin-right: 16px;
-    flex-shrink: 0;
+    font-size: 28px;
 }
 
-.icon svg {
-    width: 29px;
-    height: 29px;
-    stroke: #18323a;
-}
-
-.button-text {
-    display: flex;
-    flex-direction: column;
+.scan .icon {
+    background: rgba(255,255,255,0.13);
 }
 
 .button-title {
@@ -120,27 +106,11 @@ h1 {
 .button-description {
     font-size: 13px;
     color: #7b898d;
-    line-height: 1.3;
-}
-
-.scan {
-    background: #18323a;
-    color: white;
-}
-
-.scan .icon {
-    background: rgba(255,255,255,0.13);
-}
-
-.scan .icon svg {
-    stroke: white;
 }
 
 .scan .button-description {
     color: #cbd7da;
 }
-
-/* SECTIE */
 
 .section-title {
     font-size: 13px;
@@ -151,59 +121,160 @@ h1 {
     margin: 27px 4px 11px;
 }
 
-/* SCHERMEN */
-
-.screen {
-    display: none;
-}
-
-.screen.active {
-    display: block;
-}
-
-/* TERUG */
-
 .back-button {
     border: none;
     background: white;
     border-radius: 14px;
     padding: 11px 15px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
     font-size: 14px;
     font-weight: 600;
-    color: #18323a;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     margin-bottom: 20px;
 }
 
-.back-button svg {
-    width: 18px;
-    height: 18px;
-}
-
-/* SCANNER */
-
-.scanner-title {
+.title {
     text-align: center;
     font-size: 24px;
     margin: 5px 0 7px;
 }
 
-.scanner-text {
+.help {
     text-align: center;
     color: #718187;
     font-size: 14px;
     margin-bottom: 20px;
 }
 
-.scanner-box {
+.card {
     background: white;
-    border-radius: 24px;
+    border-radius: 22px;
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 7px 20px rgba(0,0,0,0.06);
+}
+
+label {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 7px;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    border: 1px solid #d7e0e2;
+    border-radius: 13px;
+    padding: 13px;
+    font-size: 16px;
+    margin-bottom: 16px;
+    background: white;
+}
+
+textarea {
+    min-height: 85px;
+    resize: vertical;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.primary-button,
+.secondary-button,
+.danger-button {
+    width: 100%;
+    border: none;
+    border-radius: 15px;
+    padding: 15px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.primary-button {
+    background: #18323a;
+    color: white;
+}
+
+.secondary-button {
+    background: #e8f2f4;
+    color: #18323a;
+}
+
+.danger-button {
+    background: #f7e8e8;
+    color: #8b2c2c;
+}
+
+.product-card {
+    position: relative;
+    border: 1px solid #e0e7e8;
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 14px;
+    background: #fbfdfd;
+}
+
+.product-number {
+    font-size: 13px;
+    font-weight: 700;
+    color: #708187;
+    margin-bottom: 12px;
+}
+
+.remove-product {
+    border: none;
+    background: transparent;
+    font-size: 20px;
+    cursor: pointer;
+    position: absolute;
+    right: 10px;
+    top: 8px;
+}
+
+.status {
+    display: none;
+    margin-top: 14px;
     padding: 14px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    border-radius: 15px;
+    background: #e8f5ed;
+    color: #286544;
+    text-align: center;
+    font-weight: 700;
+}
+
+.status.visible {
+    display: block;
+}
+
+.qr-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.qr-card {
+    background: white;
+    border-radius: 16px;
+    padding: 14px;
+    text-align: center;
+}
+
+.qr-code {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.qr-label {
+    font-size: 14px;
+    font-weight: 700;
 }
 
 #reader {
@@ -227,138 +298,6 @@ h1 {
     display: block;
 }
 
-.result-code {
-    font-size: 24px;
-    font-weight: 750;
-    color: #18323a;
-}
-
-.continue-button {
-    width: 100%;
-    border: none;
-    border-radius: 15px;
-    padding: 15px;
-    margin-top: 14px;
-    background: #18323a;
-    color: white;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-/* QR GENERATOR */
-
-.generator-title {
-    text-align: center;
-    font-size: 24px;
-    margin: 5px 0 7px;
-}
-
-.generator-text {
-    text-align: center;
-    color: #718187;
-    font-size: 14px;
-    margin-bottom: 22px;
-}
-
-.form-card {
-    background: white;
-    border-radius: 22px;
-    padding: 20px;
-    box-shadow: 0 7px 20px rgba(0,0,0,0.06);
-}
-
-.form-label {
-    display: block;
-    font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-.form-input {
-    width: 100%;
-    border: 1px solid #d8e1e3;
-    border-radius: 13px;
-    padding: 14px;
-    font-size: 17px;
-    margin-bottom: 18px;
-    outline: none;
-}
-
-.form-input:focus {
-    border-color: #18323a;
-}
-
-.generate-button {
-    width: 100%;
-    border: none;
-    border-radius: 15px;
-    padding: 16px;
-    background: #18323a;
-    color: white;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-/* QR RESULTAAT */
-
-.qr-area {
-    display: none;
-    margin-top: 22px;
-}
-
-.qr-area.visible {
-    display: block;
-}
-
-.qr-heading {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 15px;
-}
-
-.qr-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
-}
-
-.qr-card {
-    background: white;
-    border-radius: 16px;
-    padding: 15px;
-    text-align: center;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.06);
-}
-
-.qr-code {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 9px;
-}
-
-.qr-label {
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.print-button {
-    width: 100%;
-    border: none;
-    border-radius: 15px;
-    padding: 16px;
-    margin-top: 20px;
-    background: white;
-    color: #18323a;
-    border: 2px solid #18323a;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-/* FOOTER */
-
 .footer {
     text-align: center;
     color: #9aa7aa;
@@ -366,230 +305,132 @@ h1 {
     padding: 25px 0 20px;
 }
 
-@media (max-width: 400px) {
-
-    .app {
-        padding: 14px;
+@media (max-width: 420px) {
+    .row {
+        grid-template-columns: 1fr;
+        gap: 0;
     }
-
-    h1 {
-        font-size: 27px;
-    }
-
-    .button-title {
-        font-size: 17px;
-    }
-
 }
-
 </style>
 </head>
 
 <body>
 
-<!-- ICONEN -->
-
-<svg style="display:none">
-
-<symbol id="icon-box"
-viewBox="0 0 24 24"
-fill="none"
-stroke="currentColor"
-stroke-width="1.8"
-stroke-linecap="round"
-stroke-linejoin="round">
-
-<path d="M21 8l-9-5-9 5 9 5 9-5z"/>
-<path d="M3 8v8l9 5 9-5V8"/>
-<path d="M12 13v8"/>
-
-</symbol>
-
-<symbol id="icon-camera"
-viewBox="0 0 24 24"
-fill="none"
-stroke="currentColor"
-stroke-width="1.8"
-stroke-linecap="round"
-stroke-linejoin="round">
-
-<path d="M4 7h3l2-3h6l2 3h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"/>
-<circle cx="12" cy="13" r="4"/>
-
-</symbol>
-
-<symbol id="icon-plus"
-viewBox="0 0 24 24"
-fill="none"
-stroke="currentColor"
-stroke-width="2"
-stroke-linecap="round">
-
-<path d="M12 5v14"/>
-<path d="M5 12h14"/>
-
-</symbol>
-
-<symbol id="icon-qr"
-viewBox="0 0 24 24"
-fill="none"
-stroke="currentColor"
-stroke-width="1.8"
-stroke-linecap="round"
-stroke-linejoin="round">
-
-<rect x="3" y="3" width="6" height="6"/>
-<rect x="15" y="3" width="6" height="6"/>
-<rect x="3" y="15" width="6" height="6"/>
-<path d="M15 15h3v3h-3z"/>
-<path d="M21 15v6"/>
-<path d="M15 21h3"/>
-
-</symbol>
-
-<symbol id="icon-arrow"
-viewBox="0 0 24 24"
-fill="none"
-stroke="currentColor"
-stroke-width="2"
-stroke-linecap="round"
-stroke-linejoin="round">
-
-<path d="M15 18l-6-6 6-6"/>
-
-</symbol>
-
-</svg>
-
-
 <div class="app">
 
-
-<!-- HOME -->
+<!-- STARTSCHERM -->
 
 <div id="homeScreen" class="screen active">
 
-<div class="header">
+    <div class="header">
+        <div class="logo">📦</div>
+        <h1>VoorraadBox</h1>
+        <div class="subtitle">Jouw digitale voorraadkast</div>
+    </div>
 
-<div class="logo">
-<svg>
-<use href="#icon-box"></use>
-</svg>
+    <button class="main-button scan" onclick="openScanner()">
+        <div class="icon">📷</div>
+        <div>
+            <div class="button-title">QR-code scannen</div>
+            <div class="button-description">
+                Scan een doos en open de inhoud
+            </div>
+        </div>
+    </button>
+
+    <div class="section-title">Voorraad beheren</div>
+
+    <button class="main-button" onclick="comingSoon('Voorraad')">
+        <div class="icon">📦</div>
+        <div>
+            <div class="button-title">Voorraad</div>
+            <div class="button-description">
+                Bekijk alle dozen en producten
+            </div>
+        </div>
+    </button>
+
+    <button class="main-button" onclick="openNewBox()">
+        <div class="icon">➕</div>
+        <div>
+            <div class="button-title">Nieuwe doos</div>
+            <div class="button-description">
+                Vul een nieuwe voorraadbox
+            </div>
+        </div>
+    </button>
+
+    <button class="main-button" onclick="openGenerator()">
+        <div class="icon">▦</div>
+        <div>
+            <div class="button-title">QR-codes</div>
+            <div class="button-description">
+                Maak en print QR-codes
+            </div>
+        </div>
+    </button>
+
+    <div class="footer">VoorraadBox • versie 0.4</div>
 </div>
 
-<h1>VoorraadBox</h1>
 
-<div class="subtitle">
-Jouw digitale voorraadkast
-</div>
+<!-- NIEUWE DOOS -->
 
-</div>
+<div id="boxScreen" class="screen">
 
+    <button class="back-button" onclick="goHome()">← Terug</button>
 
-<button class="main-button scan"
-onclick="openScanner()">
+    <h2 class="title">📦 Voorraadbox</h2>
 
-<div class="icon">
-<svg>
-<use href="#icon-camera"></use>
-</svg>
-</div>
+    <div class="help">
+        Vul hieronder de gegevens van deze doos in.
+    </div>
 
-<div class="button-text">
+    <div class="card">
 
-<div class="button-title">
-QR-code scannen
-</div>
+        <label>Doosnummer</label>
+        <input id="boxId" value="DOOS-0001">
 
-<div class="button-description">
-Scan een doos en bekijk de voorraad
-</div>
+        <label>Locatie</label>
+        <select id="location">
+            <option>Vriezer 1 - lade 1</option>
+            <option>Vriezer 1 - lade 2</option>
+            <option>Vriezer 1 - lade 3</option>
+            <option>Vriezer 2 - lade 1</option>
+            <option>Vriezer 2 - lade 2</option>
+            <option>Vriezer 2 - lade 3</option>
+        </select>
 
-</div>
-
-</button>
+    </div>
 
 
-<div class="section-title">
-Voorraad beheren
-</div>
+    <div class="section-title">Producten in deze doos</div>
 
+    <div id="products"></div>
 
-<button class="main-button"
-onclick="comingSoon('Voorraad')">
+    <button class="secondary-button" onclick="addProduct()">
+        ＋ PRODUCT TOEVOEGEN
+    </button>
 
-<div class="icon">
-<svg>
-<use href="#icon-box"></use>
-</svg>
-</div>
+    <br><br>
 
-<div class="button-text">
+    <div class="card">
 
-<div class="button-title">
-Voorraad
-</div>
+        <label>Notitie bij deze doos</label>
 
-<div class="button-description">
-Bekijk alle dozen en producten
-</div>
+        <textarea
+        id="boxNote"
+        placeholder="Bijvoorbeeld: eerst gebruiken, restje saus, voor weekend..."></textarea>
 
-</div>
+    </div>
 
-</button>
+    <button class="primary-button" onclick="saveBox()">
+        💾 OPSLAAN
+    </button>
 
-
-<button class="main-button"
-onclick="comingSoon('Nieuwe doos')">
-
-<div class="icon">
-<svg>
-<use href="#icon-plus"></use>
-</svg>
-</div>
-
-<div class="button-text">
-
-<div class="button-title">
-Nieuwe doos
-</div>
-
-<div class="button-description">
-Voeg een nieuwe voorraadbox toe
-</div>
-
-</div>
-
-</button>
-
-
-<button class="main-button"
-onclick="openGenerator()">
-
-<div class="icon">
-<svg>
-<use href="#icon-qr"></use>
-</svg>
-</div>
-
-<div class="button-text">
-
-<div class="button-title">
-QR-codes
-</div>
-
-<div class="button-description">
-Maak en print QR-codes voor dozen
-</div>
-
-</div>
-
-</button>
-
-
-<div class="footer">
-VoorraadBox • versie 0.3
-</div>
+    <div id="saveStatus" class="status">
+        ✅ Doos opgeslagen
+    </div>
 
 </div>
 
@@ -598,48 +439,31 @@ VoorraadBox • versie 0.3
 
 <div id="scannerScreen" class="screen">
 
-<button class="back-button"
-onclick="closeScanner()">
+    <button class="back-button" onclick="closeScanner()">
+        ← Terug
+    </button>
 
-<svg>
-<use href="#icon-arrow"></use>
-</svg>
+    <h2 class="title">QR-code scannen</h2>
 
-Terug
+    <div class="help">
+        Richt de camera op de QR-code op het deksel.
+    </div>
 
-</button>
+    <div class="card">
+        <div id="reader"></div>
+    </div>
 
+    <div id="scanResult" class="scan-result">
 
-<h2 class="scanner-title">
-QR-code scannen
-</h2>
+        <div>QR-code gevonden</div>
 
-<div class="scanner-text">
-Richt de camera op de QR-code op het deksel.
-</div>
+        <h2 id="resultCode"></h2>
 
-<div class="scanner-box">
+        <button class="primary-button" onclick="continueToBox()">
+            Doos openen
+        </button>
 
-<div id="reader"></div>
-
-</div>
-
-<div id="scanResult" class="scan-result">
-
-<div>
-QR-code gevonden
-</div>
-
-<div id="resultCode" class="result-code"></div>
-
-<button class="continue-button"
-onclick="continueToBox()">
-
-Doos openen
-
-</button>
-
-</div>
+    </div>
 
 </div>
 
@@ -648,98 +472,42 @@ Doos openen
 
 <div id="generatorScreen" class="screen">
 
-<button class="back-button"
-onclick="closeGenerator()">
+    <button class="back-button" onclick="goHome()">
+        ← Terug
+    </button>
 
-<svg>
-<use href="#icon-arrow"></use>
-</svg>
+    <h2 class="title">QR-codes maken</h2>
 
-Terug
+    <div class="help">
+        Maak unieke QR-codes voor de voorraadboxen.
+    </div>
 
-</button>
+    <div class="card">
 
+        <label>Aantal QR-codes</label>
+        <input id="amount" type="number" min="1" max="100" value="10">
 
-<h2 class="generator-title">
-QR-codes maken
-</h2>
+        <label>Startnummer</label>
+        <input id="startNumber" type="number" min="1" value="1">
 
-<div class="generator-text">
+        <button class="primary-button" onclick="generateQRCodes()">
+            QR-CODES MAKEN
+        </button>
 
-Maak meerdere unieke QR-codes
-voor je voorraadboxen.
+    </div>
 
-</div>
+    <div id="qrGrid" class="qr-grid"></div>
 
-
-<div class="form-card">
-
-<label class="form-label">
-Aantal QR-codes
-</label>
-
-<input
-id="amount"
-class="form-input"
-type="number"
-min="1"
-max="100"
-value="10">
-
-
-<label class="form-label">
-Startnummer
-</label>
-
-<input
-id="startNumber"
-class="form-input"
-type="number"
-min="1"
-value="1">
-
-
-<button
-class="generate-button"
-onclick="generateQRCodes()">
-
-🖨️ QR-CODES MAKEN
-
-</button>
-
-</div>
-
-
-<div id="qrArea" class="qr-area">
-
-<div class="qr-heading">
-Gegenereerde QR-codes
-</div>
-
-<div id="qrGrid" class="qr-grid"></div>
-
-<button
-class="print-button"
-onclick="window.print()">
-
-🖨️ PRINTEN
-
-</button>
+    <button class="secondary-button" onclick="window.print()">
+        🖨️ PRINTEN
+    </button>
 
 </div>
 
 </div>
 
-
-</div>
-
-
-<!-- QR CODE BIBLIOTHEEK -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-<!-- QR SCANNER -->
-
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 
@@ -747,271 +515,454 @@ onclick="window.print()">
 
 let scanner = null;
 let scannedCode = null;
+let productCounter = 0;
 
 
-/* SCANNER OPENEN */
+/* SCHERMEN */
+
+function showScreen(id) {
+    document.querySelectorAll(".screen")
+        .forEach(screen => screen.classList.remove("active"));
+
+    document.getElementById(id).classList.add("active");
+
+    window.scrollTo(0,0);
+}
+
+function goHome() {
+    showScreen("homeScreen");
+}
+
+
+/* NIEUWE DOOS */
+
+function openNewBox() {
+
+    showScreen("boxScreen");
+
+    document.getElementById("products").innerHTML = "";
+
+    productCounter = 0;
+
+    addProduct();
+}
+
+
+/* PRODUCT TOEVOEGEN */
+
+function addProduct(data = {}) {
+
+    productCounter++;
+
+    const wrapper = document.createElement("div");
+
+    wrapper.className = "product-card";
+
+    wrapper.innerHTML = `
+
+        <button
+        class="remove-product"
+        onclick="this.parentElement.remove()">
+        ×
+        </button>
+
+        <div class="product-number">
+            Product ${productCounter}
+        </div>
+
+        <label>Soort / product</label>
+
+        <input
+        class="product-name"
+        placeholder="Bijvoorbeeld erwtensoep"
+        value="${data.name || ""}">
+
+        <div class="row">
+
+            <div>
+                <label>Aantal porties</label>
+
+                <input
+                class="product-portions"
+                type="number"
+                min="0"
+                value="${data.portions || ""}">
+            </div>
+
+            <div>
+                <label>Gewicht in gram</label>
+
+                <input
+                class="product-weight"
+                type="number"
+                min="0"
+                value="${data.weight || ""}">
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <div>
+                <label>Datum ingevroren</label>
+
+                <input
+                class="product-freeze"
+                type="date"
+                value="${data.freeze || getToday()}">
+            </div>
+
+            <div>
+                <label>Houdbaar tot</label>
+
+                <input
+                class="product-expiry"
+                type="date"
+                value="${data.expiry || ""}">
+            </div>
+
+        </div>
+
+        <label>Opmerking bij product</label>
+
+        <input
+        class="product-note"
+        placeholder="Bijvoorbeeld pittig, zonder zout..."
+        value="${data.note || ""}">
+    `;
+
+    document.getElementById("products").appendChild(wrapper);
+}
+
+
+/* VANDAAG */
+
+function getToday() {
+
+    const today = new Date();
+
+    return today.toISOString().split("T")[0];
+}
+
+
+/* OPSLAAN */
+
+function saveBox() {
+
+    const boxId =
+        document.getElementById("boxId").value.trim();
+
+    if (!boxId) {
+        alert("Vul eerst een doosnummer in.");
+        return;
+    }
+
+    const productCards =
+        document.querySelectorAll(".product-card");
+
+    const products = [];
+
+    productCards.forEach(card => {
+
+        products.push({
+
+            name:
+            card.querySelector(".product-name").value,
+
+            portions:
+            card.querySelector(".product-portions").value,
+
+            weight:
+            card.querySelector(".product-weight").value,
+
+            freeze:
+            card.querySelector(".product-freeze").value,
+
+            expiry:
+            card.querySelector(".product-expiry").value,
+
+            note:
+            card.querySelector(".product-note").value
+
+        });
+
+    });
+
+
+    const box = {
+
+        boxId: boxId,
+
+        location:
+        document.getElementById("location").value,
+
+        note:
+        document.getElementById("boxNote").value,
+
+        products: products,
+
+        updated:
+        new Date().toISOString()
+
+    };
+
+
+    localStorage.setItem(
+        "voorraadbox_" + boxId,
+        JSON.stringify(box)
+    );
+
+
+    const status =
+        document.getElementById("saveStatus");
+
+    status.classList.add("visible");
+
+    setTimeout(() => {
+        status.classList.remove("visible");
+    }, 2500);
+}
+
+
+/* DOOS LADEN */
+
+function loadBox(boxId) {
+
+    document.getElementById("boxId").value = boxId;
+
+    const saved =
+        localStorage.getItem("voorraadbox_" + boxId);
+
+    document.getElementById("products").innerHTML = "";
+
+    productCounter = 0;
+
+    if (!saved) {
+
+        document.getElementById("boxNote").value = "";
+
+        addProduct();
+
+        showScreen("boxScreen");
+
+        return;
+    }
+
+
+    const box =
+        JSON.parse(saved);
+
+
+    document.getElementById("location").value =
+        box.location || "Vriezer 1 - lade 1";
+
+    document.getElementById("boxNote").value =
+        box.note || "";
+
+
+    if (box.products && box.products.length) {
+
+        box.products.forEach(product => {
+            addProduct(product);
+        });
+
+    } else {
+
+        addProduct();
+
+    }
+
+
+    showScreen("boxScreen");
+}
+
+
+/* SCANNER */
 
 function openScanner() {
 
-document.getElementById("homeScreen")
-.classList.remove("active");
+    showScreen("scannerScreen");
 
-document.getElementById("scannerScreen")
-.classList.add("active");
+    scannedCode = null;
 
-document.getElementById("scanResult")
-.classList.remove("visible");
+    document.getElementById("scanResult")
+        .classList.remove("visible");
 
-scannedCode = null;
-
-startScanner();
-
+    startScanner();
 }
 
-
-/* SCANNER STARTEN */
 
 function startScanner() {
 
-scanner = new Html5Qrcode("reader");
+    scanner = new Html5Qrcode("reader");
 
-const config = {
+    scanner.start(
 
-fps: 10,
+        {
+            facingMode: "environment"
+        },
 
-qrbox: {
-width: 250,
-height: 250
-},
+        {
+            fps: 10,
 
-formatsToSupport: [
-Html5QrcodeSupportedFormats.QR_CODE
-]
+            qrbox: {
+                width: 250,
+                height: 250
+            },
 
-};
+            formatsToSupport: [
+                Html5QrcodeSupportedFormats.QR_CODE
+            ]
+        },
 
+        function(decodedText) {
 
-scanner.start(
+            scannedCode = decodedText;
 
-{
-facingMode: "environment"
-},
+            document.getElementById("resultCode")
+                .innerText = decodedText;
 
-config,
+            document.getElementById("scanResult")
+                .classList.add("visible");
 
-function(decodedText) {
+            scanner.stop()
+                .catch(error => console.log(error));
+        },
 
-scannedCode = decodedText;
+        function(errorMessage) {
+            /* scanner blijft zoeken */
+        }
 
-document.getElementById("resultCode")
-.innerText = decodedText;
+    ).catch(function(error) {
 
-document.getElementById("scanResult")
-.classList.add("visible");
+        alert(
+            "De camera kon niet worden gestart. " +
+            "Controleer de cameratoestemming."
+        );
 
-scanner.stop()
-.catch(function(error) {
-console.log(error);
-});
-
-},
-
-function(errorMessage) {
-
-/* Scanner zoekt gewoon verder */
-
+        console.log(error);
+    });
 }
 
-).catch(function(error) {
-
-alert(
-"De camera kon niet worden gestart. " +
-"Controleer of je toestemming hebt gegeven."
-);
-
-console.log(error);
-
-});
-
-}
-
-
-/* SCANNER SLUITEN */
 
 function closeScanner() {
 
-if (scanner) {
+    if (scanner) {
 
-scanner.stop()
-.then(function() {
+        scanner.stop()
+            .then(() => scanner.clear())
+            .catch(() => {});
+    }
 
-scanner.clear();
-
-})
-.catch(function(error) {
-
-console.log(error);
-
-});
-
+    goHome();
 }
 
-document.getElementById("scannerScreen")
-.classList.remove("active");
-
-document.getElementById("homeScreen")
-.classList.add("active");
-
-}
-
-
-/* DOOS OPENEN */
 
 function continueToBox() {
 
-alert(
-"QR-code gelezen:\n\n" +
-scannedCode +
-"\n\nDe voorraadkoppeling bouwen we hierna."
-);
+    if (!scannedCode) {
+        return;
+    }
 
+    if (!scannedCode.startsWith("DOOS-")) {
+
+        alert(
+            "Deze QR-code hoort niet bij VoorraadBox."
+        );
+
+        return;
+    }
+
+    loadBox(scannedCode);
 }
 
 
-/* QR GENERATOR OPENEN */
+/* QR GENERATOR */
 
 function openGenerator() {
 
-document.getElementById("homeScreen")
-.classList.remove("active");
-
-document.getElementById("generatorScreen")
-.classList.add("active");
-
+    showScreen("generatorScreen");
 }
 
-
-/* QR GENERATOR SLUITEN */
-
-function closeGenerator() {
-
-document.getElementById("generatorScreen")
-.classList.remove("active");
-
-document.getElementById("homeScreen")
-.classList.add("active");
-
-}
-
-
-/* QR CODES MAKEN */
 
 function generateQRCodes() {
 
-const amount =
-parseInt(
-document.getElementById("amount").value
-);
+    const amount =
+        parseInt(document.getElementById("amount").value);
 
-const startNumber =
-parseInt(
-document.getElementById("startNumber").value
-);
+    const startNumber =
+        parseInt(document.getElementById("startNumber").value);
+
+    if (
+        isNaN(amount) ||
+        amount < 1 ||
+        amount > 100
+    ) {
+
+        alert("Kies een aantal tussen 1 en 100.");
+        return;
+    }
 
 
-if (
-isNaN(amount) ||
-amount < 1 ||
-amount > 100
-) {
+    const grid =
+        document.getElementById("qrGrid");
 
-alert(
-"Vul een aantal tussen 1 en 100 in."
-);
+    grid.innerHTML = "";
 
-return;
 
+    for (let i = 0; i < amount; i++) {
+
+        const number =
+            startNumber + i;
+
+        const code =
+            "DOOS-" +
+            String(number).padStart(4, "0");
+
+
+        const card =
+            document.createElement("div");
+
+        card.className = "qr-card";
+
+
+        const qr =
+            document.createElement("div");
+
+        qr.className = "qr-code";
+
+
+        const label =
+            document.createElement("div");
+
+        label.className = "qr-label";
+
+        label.innerText = code;
+
+
+        card.appendChild(qr);
+        card.appendChild(label);
+
+        grid.appendChild(card);
+
+
+        new QRCode(qr, {
+            text: code,
+            width: 140,
+            height: 140
+        });
+    }
 }
 
 
-const grid =
-document.getElementById("qrGrid");
-
-grid.innerHTML = "";
-
-
-for (
-let i = 0;
-i < amount;
-i++
-) {
-
-const number =
-startNumber + i;
-
-const code =
-"DOOS-" +
-String(number).padStart(4,"0");
-
-
-const card =
-document.createElement("div");
-
-card.className =
-"qr-card";
-
-
-const qr =
-document.createElement("div");
-
-qr.className =
-"qr-code";
-
-
-const label =
-document.createElement("div");
-
-label.className =
-"qr-label";
-
-label.innerText =
-code;
-
-
-card.appendChild(qr);
-
-card.appendChild(label);
-
-grid.appendChild(card);
-
-
-new QRCode(
-qr,
-{
-text: code,
-width: 150,
-height: 150
-}
-);
-
-}
-
-
-document.getElementById("qrArea")
-.classList.add("visible");
-
-}
-
-
-/* TIJDELIJKE KNOPPEN */
+/* TIJDELIJK */
 
 function comingSoon(name) {
 
-alert(
-name +
-"\n\nDeze functie gaan we stap voor stap bouwen."
-);
-
+    alert(
+        name +
+        "\n\nDeze functie bouwen we in een volgende stap."
+    );
 }
 
 </script>
