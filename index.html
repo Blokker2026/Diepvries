@@ -381,7 +381,7 @@ textarea {
 <!-- gewone knoppen van Voorraad hierboven -->
 
    
-    <div class="footer">VoorraadBox • versie 0.7</div>
+    <div class="footer">VoorraadBox • versie 0.8</div>
 </div>
 
 
@@ -637,6 +637,8 @@ function goHome() {
     async function openGebruiken() {
 
     showScreen("gebruikenScreen");
+
+    await ruimLegeProductenOp();
 
     const doosSelect =
         document.getElementById("gebruikDoosnummer");
@@ -1035,9 +1037,63 @@ async function productGebruiken() {
 }
 
 
+async function ruimLegeProductenOp() {
+
+    const { data: producten, error } = await voorraadDb
+        .from("Producten")
+        .select("id, gewicht, porties");
+
+    if (error) {
+        console.log(
+            "Lege producten konden niet worden gecontroleerd:",
+            error
+        );
+        return;
+    }
+
+    for (const product of (producten || [])) {
+
+        const houdtGewichtBij =
+            product.gewicht !== null;
+
+        const houdtPortiesBij =
+            product.porties !== null;
+
+        const gewichtIsLeeg =
+            !houdtGewichtBij || Number(product.gewicht) <= 0;
+
+        const portiesZijnLeeg =
+            !houdtPortiesBij || Number(product.porties) <= 0;
+
+        const volledigOp =
+            (houdtGewichtBij || houdtPortiesBij) &&
+            gewichtIsLeeg &&
+            portiesZijnLeeg;
+
+        if (!volledigOp) {
+            continue;
+        }
+
+        const { error: deleteFout } = await voorraadDb
+            .from("Producten")
+            .delete()
+            .eq("id", product.id);
+
+        if (deleteFout) {
+            console.log(
+                "Leeg product kon niet automatisch worden verwijderd:",
+                deleteFout
+            );
+        }
+    }
+}
+
+
 async function openVoorraad() {
 
     showScreen("screen-voorraad");
+
+    await ruimLegeProductenOp();
 
     const loading =
         document.getElementById("voorraad-loading");
