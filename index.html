@@ -388,10 +388,17 @@ textarea {
             </div>
         </div>
     </button>
+    <button class="main-button" onclick="openOpnieuwVullen()">
+        <div class="icon">♻️</div>
+        <div>
+            <div class="button-title">Opnieuw vullen</div>
+            <div class="button-description">Vul een bestaande lege doos opnieuw</div>
+        </div>
+    </button>
 <!-- gewone knoppen van Voorraad hierboven -->
 
    
-    <div class="footer">VoorraadBox • versie 1.0</div>
+    <div class="footer">VoorraadBox • versie 1.1</div>
 </div>
 
 
@@ -618,6 +625,25 @@ textarea {
 
 </div>
 
+
+
+<!-- SCHERM: OPNIEUW VULLEN -->
+<div id="opnieuwVullenScreen" class="screen">
+    <button class="back-button" onclick="goHome()">← Terug</button>
+    <h2 class="title">♻️ Opnieuw vullen</h2>
+    <div class="help">Kies een bestaande lege doos. De locatie en het kenmerk van de doos blijven ongewijzigd.</div>
+    <div class="card">
+        <label>Doosnummer</label>
+        <select id="opnieuwDoosnummer"><option value="">Kies een lege doos...</option></select>
+        <div id="opnieuwDoosInfo" style="display:none;margin-top:18px;"></div>
+    </div>
+    <div id="opnieuwProductGebied" style="display:none;">
+        <div id="opnieuwProductList"></div>
+        <button type="button" class="secondary-button" onclick="addOpnieuwProduct()">➕ Nog een product</button>
+        <button type="button" class="primary-button" onclick="saveOpnieuwVullen()">♻️ DOOS OPNIEUW VULLEN</button>
+    </div>
+    <div id="opnieuwStatus" class="status"></div>
+</div>
 
 <!-- QR GENERATOR -->
 
@@ -1139,6 +1165,106 @@ async function ruimLegeProductenOp() {
     }
 }
 
+
+
+async function openOpnieuwVullen() {
+    showScreen("opnieuwVullenScreen");
+    await ruimLegeProductenOp();
+
+    const s = document.getElementById("opnieuwDoosnummer");
+    s.innerHTML = '<option value="">Kies een lege doos...</option>';
+    document.getElementById("opnieuwDoosInfo").style.display = "none";
+    document.getElementById("opnieuwProductGebied").style.display = "none";
+    document.getElementById("opnieuwProductList").innerHTML = "";
+    document.getElementById("opnieuwStatus").classList.remove("visible");
+
+    const {data: dozen, error:e1} = await voorraadDb.from("dozen")
+        .select("doosnummer, locatie, notitie").order("doosnummer", {ascending:true});
+    if(e1){ alert("De dozen konden niet worden geladen:\n\n"+e1.message); return; }
+
+    const {data: producten, error:e2} = await voorraadDb.from("Producten").select("doosnummer");
+    if(e2){ alert("De producten konden niet worden gecontroleerd:\n\n"+e2.message); return; }
+
+    const bezet = new Set((producten||[]).map(p=>p.doosnummer));
+    (dozen||[]).filter(d=>!bezet.has(d.doosnummer)).forEach(d=>{
+        const o=document.createElement("option");
+        o.value=d.doosnummer;
+        o.textContent=d.doosnummer+" - "+(d.locatie||"Geen locatie");
+        o.dataset.locatie=d.locatie||"";
+        o.dataset.notitie=d.notitie||"";
+        s.appendChild(o);
+    });
+    s.onchange=laadLegeDoosVoorOpnieuwVullen;
+}
+
+function laadLegeDoosVoorOpnieuwVullen(){
+    const s=document.getElementById("opnieuwDoosnummer");
+    const info=document.getElementById("opnieuwDoosInfo");
+    const gebied=document.getElementById("opnieuwProductGebied");
+    const lijst=document.getElementById("opnieuwProductList");
+    if(!s.value){info.style.display="none";gebied.style.display="none";lijst.innerHTML="";return;}
+    const o=s.options[s.selectedIndex];
+    info.innerHTML="<strong>📦 "+escapeHtml(s.value)+"</strong><br>📍 "+
+        escapeHtml(o.dataset.locatie||"Geen locatie")+"<br>Kenmerk doos: "+
+        escapeHtml(o.dataset.notitie||"-");
+    info.style.display="block"; gebied.style.display="block"; lijst.innerHTML="";
+    addOpnieuwProduct();
+}
+
+function addOpnieuwProduct(){
+    const c=document.createElement("div");
+    c.className="product-card";
+    c.innerHTML=`
+      <button type="button" class="remove-product" onclick="removeOpnieuwProduct(this)">×</button>
+      <label>Productnaam</label><input class="opnieuw-name" type="text" placeholder="Bijvoorbeeld: soep">
+      <div class="row"><div><label>Aantal porties (optioneel)</label><input class="opnieuw-portions" type="number" min="0"></div>
+      <div><label>Gewicht in gram (optioneel)</label><input class="opnieuw-weight" type="number" min="0"></div></div>
+      <div class="row"><div><label>Invriesdatum</label><input class="opnieuw-freeze" type="date"></div>
+      <div><label>Houdbaar tot (optioneel)</label><input class="opnieuw-expiry" type="date"></div></div>
+      <label>Notitie bij product (optioneel)</label><textarea class="opnieuw-note"></textarea>`;
+    document.getElementById("opnieuwProductList").appendChild(c);
+    c.querySelector(".opnieuw-freeze").value=new Date().toISOString().split("T")[0];
+}
+
+function removeOpnieuwProduct(b){
+    const l=document.getElementById("opnieuwProductList");
+    if(l.querySelectorAll(".product-card").length<=1){alert("Er moet minimaal één product blijven staan.");return;}
+    b.closest(".product-card").remove();
+}
+
+async function saveOpnieuwVullen(){
+    const boxId=document.getElementById("opnieuwDoosnummer").value;
+    if(!boxId){alert("Kies eerst een lege doos.");return;}
+
+    const {data:bestaand,error:ce}=await voorraadDb.from("Producten").select("id").eq("doosnummer",boxId).limit(1);
+    if(ce){alert("De doos kon niet worden gecontroleerd:\n\n"+ce.message);return;}
+    if(bestaand&&bestaand.length){alert("Deze doos is inmiddels niet meer leeg.");await openOpnieuwVullen();return;}
+
+    const producten=[];
+    for(const c of document.querySelectorAll("#opnieuwProductList .product-card")){
+        const naam=c.querySelector(".opnieuw-name").value.trim();
+        const pv=c.querySelector(".opnieuw-portions").value;
+        const gw=c.querySelector(".opnieuw-weight").value;
+        if(!naam){alert("Vul bij ieder product een productnaam in.");return;}
+        if(pv===""&&gw===""){alert("Vul bij ieder product minimaal het aantal porties of het gewicht in.");return;}
+        producten.push({
+            doosnummer:boxId, Naam:naam,
+            porties:pv===""?null:Number(pv), gewicht:gw===""?null:Number(gw),
+            invriesdatum:c.querySelector(".opnieuw-freeze").value||null,
+            houdbaar_tot:c.querySelector(".opnieuw-expiry").value||null,
+            notitie:c.querySelector(".opnieuw-note").value.trim()
+        });
+    }
+
+    const {error}=await voorraadDb.from("Producten").insert(producten);
+    if(error){alert("De producten konden niet worden opgeslagen:\n\n"+error.message);return;}
+
+    const st=document.getElementById("opnieuwStatus");
+    st.innerHTML="✅ DOOS OPNIEUW GEVULD<br><br>"+escapeHtml(boxId)+"<br>"+
+        producten.length+" product(en) toegevoegd.<br>Locatie en kenmerk van de doos zijn ongewijzigd.";
+    st.classList.add("visible");
+    document.getElementById("opnieuwProductGebied").style.display="none";
+}
 
 async function openDoosLeeg() {
 
@@ -2153,4 +2279,6 @@ async function testSupabaseVerbinding() {
 
 </body>
 </html>
+
+
 
