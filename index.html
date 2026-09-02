@@ -381,7 +381,7 @@ textarea {
 <!-- gewone knoppen van Voorraad hierboven -->
 
    
-    <div class="footer">VoorraadBox • versie 0.6</div>
+    <div class="footer">VoorraadBox • versie 0.7</div>
 </div>
 
 
@@ -720,7 +720,50 @@ async function laadProductenVoorGebruik() {
         return;
     }
 
-    (producten || []).forEach(product => {
+    const geldigeProducten = [];
+
+    for (const product of (producten || [])) {
+
+        const houdtGewichtBij =
+            product.gewicht !== null;
+
+        const houdtPortiesBij =
+            product.porties !== null;
+
+        const gewichtIsLeeg =
+            !houdtGewichtBij || Number(product.gewicht) <= 0;
+
+        const portiesZijnLeeg =
+            !houdtPortiesBij || Number(product.porties) <= 0;
+
+        const volledigOp =
+            (houdtGewichtBij || houdtPortiesBij) &&
+            gewichtIsLeeg &&
+            portiesZijnLeeg;
+
+        if (volledigOp) {
+
+            const { error: verwijderFout } = await voorraadDb
+                .from("Producten")
+                .delete()
+                .eq("id", product.id);
+
+            if (verwijderFout) {
+                console.log(
+                    "Leeg product kon niet automatisch worden verwijderd:",
+                    verwijderFout
+                );
+
+                geldigeProducten.push(product);
+            }
+
+            continue;
+        }
+
+        geldigeProducten.push(product);
+    }
+
+    geldigeProducten.forEach(product => {
 
         const option =
             document.createElement("option");
@@ -820,7 +863,6 @@ async function productGebruiken() {
         return;
     }
 
-    // null betekent: dit veld wordt voor dit product niet bijgehouden
     const huidigGewicht =
         product.gewicht === null
             ? null
@@ -879,22 +921,25 @@ async function productGebruiken() {
             ? null
             : huidigePorties - (gebruiktePorties ?? 0);
 
-    // Verwijder alleen als ALLE daadwerkelijk bijgehouden hoeveelheden op 0 staan.
-    // Voorbeelden:
-    // gewicht=0, porties=null  -> verwijderen
-    // gewicht=null, porties=0  -> verwijderen
-    // gewicht=0, porties=2     -> NIET verwijderen
-    // gewicht=299, porties=0   -> NIET verwijderen
-    const gewichtLeeg =
-        huidigGewicht === null || nieuwGewicht === 0;
+    const houdtGewichtBij =
+        huidigGewicht !== null;
 
-    const portiesLeeg =
-        huidigePorties === null || nieuwePorties === 0;
+    const houdtPortiesBij =
+        huidigePorties !== null;
 
+    const gewichtIsLeeg =
+        !houdtGewichtBij || nieuwGewicht <= 0;
+
+    const portiesZijnLeeg =
+        !houdtPortiesBij || nieuwePorties <= 0;
+
+    // EN/EN-controle:
+    // Een product wordt alleen verwijderd als ALLE hoeveelheden
+    // die voor dit product daadwerkelijk worden bijgehouden op zijn.
     const moetVerwijderen =
-        gewichtLeeg &&
-        portiesLeeg &&
-        (huidigGewicht !== null || huidigePorties !== null);
+        (houdtGewichtBij || houdtPortiesBij) &&
+        gewichtIsLeeg &&
+        portiesZijnLeeg;
 
     const status =
         document.getElementById("gebruikStatus");
@@ -1734,5 +1779,4 @@ async function testSupabaseVerbinding() {
 
 </body>
 </html>
-
 
