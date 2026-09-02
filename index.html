@@ -371,18 +371,6 @@ textarea {
     </button>
 <!-- gewone knoppen van Voorraad hierboven -->
 
-
-<!-- TIJDELIJKE DATABASE TESTKNOP -->
-<button class="main-button" onclick="testSupabaseVerbinding()">
-    <div class="icon">☁️</div>
-    <div>
-        <div class="button-title">Database testen</div>
-        <div class="button-description">
-            Controleer de verbinding met Supabase
-        </div>
-    </div>
-</button>
-
    
     <div class="footer">VoorraadBox • versie 0.4</div>
 </div>
@@ -619,8 +607,8 @@ async function openVoorraad() {
         document.createElement("div");
 
     kaart.className = "card";
-    kaart.style.cursor = "pointer";
-    kaart.onclick = () => openDoos(doos.doosnummer);
+        kaart.style.cursor = "pointer";
+        kaart.onclick = () => openDoos(doos.doosnummer);
         
     kaart.innerHTML = `
         <div style="font-size:20px;font-weight:700;margin-bottom:8px;">
