@@ -1469,42 +1469,57 @@ async function saveBox() {
     // 3. PRODUCTEN VERZAMELEN
     // -----------------------------
 
-    const producten = [];
+   const producten = [];
 
-    productCards.forEach(card => {
+let productFoutGevonden = false;
 
-        const naam =
-            card.querySelector(".product-name").value.trim();
+for (const card of productCards) {
 
-        if (!naam) {
-            return;
-        }
+    const naam =
+        card.querySelector(".product-name").value.trim();
 
-        const porties =
-            card.querySelector(".product-portions").value;
+    if (!naam) {
+        continue;
+    }
 
-        const gewicht =
-            card.querySelector(".product-weight").value;
+    const porties =
+        card.querySelector(".product-portions").value;
 
-        const invriesdatum =
-            card.querySelector(".product-freeze").value;
+    const gewicht =
+        card.querySelector(".product-weight").value;
 
-        const houdbaarTot =
-            card.querySelector(".product-expiry").value;
+    if (!porties && !gewicht) {
+        alert(
+            "Vul bij ieder product minimaal het aantal porties of het gewicht in."
+        );
 
-        const notitie =
-            card.querySelector(".product-note").value;
+        productFoutGevonden = true;
+        break;
+    }
 
-        producten.push({
-            doosnummer: boxId,
-            Naam: naam,
-            porties: porties ? Number(porties) : null,
-            gewicht: gewicht ? Number(gewicht) : null,
-            invriesdatum: invriesdatum || null,
-            houdbaar_tot: houdbaarTot || null,
-            notitie: notitie
-        });
+    const invriesdatum =
+        card.querySelector(".product-freeze").value;
+
+    const houdbaarTot =
+        card.querySelector(".product-expiry").value;
+
+    const notitie =
+        card.querySelector(".product-note").value;
+
+    producten.push({
+        doosnummer: boxId,
+        Naam: naam,
+        porties: porties ? Number(porties) : null,
+        gewicht: gewicht ? Number(gewicht) : null,
+        invriesdatum: invriesdatum || null,
+        houdbaar_tot: houdbaarTot || null,
+        notitie: notitie
     });
+}
+
+if (productFoutGevonden) {
+    return;
+}
 
     // -----------------------------
     // 4. OUDE PRODUCTEN VERWIJDEREN
