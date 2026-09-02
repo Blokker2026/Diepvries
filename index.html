@@ -725,7 +725,98 @@ function goHome() {
     });
 }
 
-   
+   async function productGebruiken() {
+
+    const productId =
+        document.getElementById("gebruikProduct").value;
+
+    const gebruiktePorties =
+        Number(document.getElementById("gebruikPorties").value || 0);
+
+    const gebruiktGewicht =
+        Number(document.getElementById("gebruikGewicht").value || 0);
+
+    if (!productId) {
+        alert("Kies eerst een product.");
+        return;
+    }
+
+    if (gebruiktePorties <= 0 && gebruiktGewicht <= 0) {
+        alert("Vul het aantal porties of het gebruikte gewicht in.");
+        return;
+    }
+
+    // Huidige productgegevens ophalen
+    const { data: product, error: leesFout } = await voorraadDb
+        .from("Producten")
+        .select("*")
+        .eq("id", productId)
+        .single();
+
+    if (leesFout) {
+        alert(
+            "Het product kon niet worden geladen:\n\n" +
+            leesFout.message
+        );
+        return;
+    }
+
+    const huidigGewicht =
+        Number(product.gewicht || 0);
+
+    const huidigePorties =
+        Number(product.porties || 0);
+
+    // Controleren of we niet te veel gebruiken
+    if (gebruiktGewicht > huidigGewicht) {
+        alert(
+            "Je kunt niet meer gewicht gebruiken dan er aanwezig is.\n\n" +
+            "Aanwezig: " + huidigGewicht + " gram"
+        );
+        return;
+    }
+
+    if (gebruiktePorties > huidigePorties) {
+        alert(
+            "Je kunt niet meer porties gebruiken dan er aanwezig zijn.\n\n" +
+            "Aanwezig: " + huidigePorties + " porties"
+        );
+        return;
+    }
+
+    const nieuwGewicht =
+        huidigGewicht - gebruiktGewicht;
+
+    const nieuwePorties =
+        huidigePorties - gebruiktePorties;
+
+    // Nieuwe voorraad opslaan
+    const { error: updateFout } = await voorraadDb
+        .from("Producten")
+        .update({
+            gewicht: nieuwGewicht,
+            porties: nieuwePorties
+        })
+        .eq("id", productId);
+
+    if (updateFout) {
+        alert(
+            "De voorraad kon niet worden aangepast:\n\n" +
+            updateFout.message
+        );
+        return;
+    }
+
+    document.getElementById("gebruikStatus").innerHTML =
+        "✅ Voorraad aangepast.<br>" +
+        "Nieuw gewicht: " + nieuwGewicht + " gram<br>" +
+        "Resterende porties: " + nieuwePorties;
+
+    document.getElementById("gebruikPorties").value = "";
+    document.getElementById("gebruikGewicht").value = "";
+
+    await laadProductenVoorGebruik();
+}
 async function openVoorraad() {
 
     showScreen("screen-voorraad");
