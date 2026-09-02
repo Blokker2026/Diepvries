@@ -619,7 +619,9 @@ async function openVoorraad() {
         document.createElement("div");
 
     kaart.className = "card";
-
+    kaart.style.cursor = "pointer";
+    kaart.onclick = () => openDoos(doos.doosnummer);
+        
     kaart.innerHTML = `
         <div style="font-size:20px;font-weight:700;margin-bottom:8px;">
             📦 ${doos.doosnummer || "Onbekende doos"}
