@@ -754,7 +754,7 @@ async function openVoorraad() {
     showScreen("boxScreen");
 }
 /* Open bestaande doos vanuit voorraad  NIEUWE DOOS */
-
+ 
 function openNewBox() {
 
     showScreen("boxScreen");
@@ -867,6 +867,7 @@ function getToday() {
 /* OPSLAAN */
 
 async function saveBox() {
+async function saveBox() {
 
     const boxId =
         document.getElementById("boxId").value.trim();
@@ -886,39 +887,67 @@ async function saveBox() {
         document.querySelectorAll(".product-card");
 
     // -----------------------------
-    // 1. DOOS OPSLAAN IN SUPABASE
+    // 1. CONTROLEREN OF DOOS BESTAAT
     // -----------------------------
 
-    const { data: opgeslagenDoos, error: doosError } = await voorraadDb
-    .from("dozen")
-    .insert({
-        doosnummer: boxId,
-        locatie: locatie,
-        notitie: doosNotitie
-    })
-    .select()
-    .single();
+    const { data: bestaandeDoos, error: zoekFout } = await voorraadDb
+        .from("dozen")
+        .select("*")
+        .eq("doosnummer", boxId)
+        .maybeSingle();
 
-    
-    if (doosError) {
-
+    if (zoekFout) {
         alert(
-            "De doos kon niet worden opgeslagen:\n\n" +
-            doosError.message
+            "De doos kon niet worden gecontroleerd:\n\n" +
+            zoekFout.message
         );
-
-        console.log("Fout bij doos opslaan:", doosError);
         return;
     }
-    alert(
-    "Supabase heeft de doos opgeslagen ✅\n\n" +
-    "ID: " + opgeslagenDoos.id + "\n" +
-    "Doosnummer: " + opgeslagenDoos.doosnummer
-);
-
 
     // -----------------------------
-    // 2. PRODUCTEN VERZAMELEN
+    // 2. DOOS TOEVOEGEN OF WIJZIGEN
+    // -----------------------------
+
+    if (bestaandeDoos) {
+
+        const { error: updateFout } = await voorraadDb
+            .from("dozen")
+            .update({
+                locatie: locatie,
+                notitie: doosNotitie,
+                updated_at: new Date().toISOString()
+            })
+            .eq("doosnummer", boxId);
+
+        if (updateFout) {
+            alert(
+                "De doos kon niet worden gewijzigd:\n\n" +
+                updateFout.message
+            );
+            return;
+        }
+
+    } else {
+
+        const { error: insertFout } = await voorraadDb
+            .from("dozen")
+            .insert({
+                doosnummer: boxId,
+                locatie: locatie,
+                notitie: doosNotitie
+            });
+
+        if (insertFout) {
+            alert(
+                "De doos kon niet worden opgeslagen:\n\n" +
+                insertFout.message
+            );
+            return;
+        }
+    }
+
+    // -----------------------------
+    // 3. PRODUCTEN VERZAMELEN
     // -----------------------------
 
     const producten = [];
@@ -928,7 +957,6 @@ async function saveBox() {
         const naam =
             card.querySelector(".product-name").value.trim();
 
-        // Lege productregels niet opslaan
         if (!naam) {
             return;
         }
@@ -960,37 +988,51 @@ async function saveBox() {
     });
 
     // -----------------------------
-    // 3. PRODUCTEN OPSLAAN
+    // 4. OUDE PRODUCTEN VERWIJDEREN
+    // -----------------------------
+
+    const { error: deleteFout } = await voorraadDb
+        .from("Producten")
+        .delete()
+        .eq("doosnummer", boxId);
+
+    if (deleteFout) {
+        alert(
+            "De bestaande producten konden niet worden bijgewerkt:\n\n" +
+            deleteFout.message
+        );
+        return;
+    }
+
+    // -----------------------------
+    // 5. NIEUWE PRODUCTLIJST OPSLAAN
     // -----------------------------
 
     if (producten.length > 0) {
 
-        const { error: productError } = await voorraadDb
+        const { error: productFout } = await voorraadDb
             .from("Producten")
             .insert(producten);
 
-        if (productError) {
-
+        if (productFout) {
             alert(
-                "De doos is opgeslagen, maar de producten niet:\n\n" +
-                productError.message
+                "De producten konden niet worden opgeslagen:\n\n" +
+                productFout.message
             );
-
-            console.log(
-                "Fout bij producten opslaan:",
-                productError
-            );
-
             return;
         }
     }
 
     // -----------------------------
-    // 4. BEVESTIGING TONEN
+    // 6. BEVESTIGING
     // -----------------------------
 
     const status =
         document.getElementById("saveStatus");
+
+    status.innerHTML = bestaandeDoos
+        ? "✅ Wijzigingen opgeslagen"
+        : "✅ Doos opgeslagen";
 
     status.classList.add("visible");
 
@@ -1003,7 +1045,6 @@ async function saveBox() {
         status.classList.remove("visible");
     }, 3500);
 }
-
 
 /* DOOS LADEN */
 
