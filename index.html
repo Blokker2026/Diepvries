@@ -791,13 +791,15 @@ function goHome() {
         huidigePorties - gebruiktePorties;
 
     // Nieuwe voorraad opslaan
-    const { error: updateFout } = await voorraadDb
-        .from("Producten")
-        .update({
-            gewicht: nieuwGewicht,
-            porties: nieuwePorties
-        })
-        .eq("id", productId);
+    const { data: gewijzigdProduct, error: updateFout } = await voorraadDb
+    .from("Producten")
+    .update({
+        gewicht: nieuwGewicht,
+        porties: nieuwePorties
+    })
+    .eq("id", productId)
+    .select()
+    .single();
 
     if (updateFout) {
         alert(
