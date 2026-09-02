@@ -381,7 +381,7 @@ textarea {
 <!-- gewone knoppen van Voorraad hierboven -->
 
    
-    <div class="footer">VoorraadBox • versie 0.4</div>
+    <div class="footer">VoorraadBox • versie 0.5</div>
 </div>
 
 
@@ -563,7 +563,7 @@ textarea {
 
     </div>
 
-    <div id="gebruikStatus"></div>
+    <div id="gebruikStatus" class="status"></div>
 
 </div>
     
@@ -644,15 +644,24 @@ function goHome() {
     const productSelect =
         document.getElementById("gebruikProduct");
 
+    const status =
+        document.getElementById("gebruikStatus");
+
     doosSelect.innerHTML =
         '<option value="">Kies een doos...</option>';
 
     productSelect.innerHTML =
         '<option value="">Kies eerst een doos...</option>';
 
+    document.getElementById("gebruikPorties").value = "";
+    document.getElementById("gebruikGewicht").value = "";
+
+    status.classList.remove("visible");
+    status.innerHTML = "";
+
     const { data: dozen, error } = await voorraadDb
         .from("dozen")
-        .select("*")
+        .select("doosnummer, locatie")
         .order("doosnummer", { ascending: true });
 
     if (error) {
@@ -663,14 +672,14 @@ function goHome() {
         return;
     }
 
-    dozen.forEach(doos => {
+    (dozen || []).forEach(doos => {
 
         const option =
             document.createElement("option");
 
         option.value = doos.doosnummer;
         option.textContent =
-            doos.doosnummer + " - " + (doos.locatie || "");
+            doos.doosnummer + " - " + (doos.locatie || "Geen locatie");
 
         doosSelect.appendChild(option);
     });
@@ -678,7 +687,8 @@ function goHome() {
     doosSelect.onchange = laadProductenVoorGebruik;
 }
 
-       async function laadProductenVoorGebruik() {
+
+async function laadProductenVoorGebruik() {
 
     const doosnummer =
         document.getElementById("gebruikDoosnummer").value;
@@ -689,14 +699,18 @@ function goHome() {
     productSelect.innerHTML =
         '<option value="">Kies een product...</option>';
 
+    document.getElementById("gebruikPorties").value = "";
+    document.getElementById("gebruikGewicht").value = "";
+
     if (!doosnummer) {
         return;
     }
 
     const { data: producten, error } = await voorraadDb
         .from("Producten")
-        .select("*")
-        .eq("doosnummer", doosnummer);
+        .select("id, Naam, gewicht, porties")
+        .eq("doosnummer", doosnummer)
+        .order("id", { ascending: true });
 
     if (error) {
         alert(
@@ -706,28 +720,29 @@ function goHome() {
         return;
     }
 
-    producten.forEach(product => {
+    (producten || []).forEach(product => {
 
         const option =
             document.createElement("option");
 
-        option.value = product.id;
+        option.value = String(product.id);
 
         option.textContent =
-            product.Naam +
+            (product.Naam || "Product") +
             " — " +
-            (product.gewicht ?? "-") +
+            (product.gewicht ?? 0) +
             " gram — " +
-            (product.porties ?? "-") +
+            (product.porties ?? 0) +
             " porties";
 
         productSelect.appendChild(option);
     });
 }
 
-   async function productGebruiken() {
 
-    const productId =
+async function productGebruiken() {
+
+    const productIdTekst =
         document.getElementById("gebruikProduct").value;
 
     const gebruiktePorties =
@@ -736,22 +751,38 @@ function goHome() {
     const gebruiktGewicht =
         Number(document.getElementById("gebruikGewicht").value || 0);
 
-    if (!productId) {
+    if (!productIdTekst) {
         alert("Kies eerst een product.");
         return;
     }
 
-    if (gebruiktePorties <= 0 && gebruiktGewicht <= 0) {
+    const productId = Number(productIdTekst);
+
+    if (!Number.isInteger(productId)) {
+        alert("Het gekozen product heeft geen geldig ID.");
+        return;
+    }
+
+    if (
+        !Number.isFinite(gebruiktePorties) ||
+        !Number.isFinite(gebruiktGewicht) ||
+        gebruiktePorties < 0 ||
+        gebruiktGewicht < 0
+    ) {
+        alert("Vul geldige positieve aantallen in.");
+        return;
+    }
+
+    if (gebruiktePorties === 0 && gebruiktGewicht === 0) {
         alert("Vul het aantal porties of het gebruikte gewicht in.");
         return;
     }
 
-    // Huidige productgegevens ophalen
     const { data: product, error: leesFout } = await voorraadDb
         .from("Producten")
-        .select("*")
+        .select("id, Naam, doosnummer, gewicht, porties")
         .eq("id", productId)
-        .single();
+        .maybeSingle();
 
     if (leesFout) {
         alert(
@@ -761,13 +792,18 @@ function goHome() {
         return;
     }
 
+    if (!product) {
+        alert("Het gekozen product bestaat niet meer in de voorraad.");
+        await laadProductenVoorGebruik();
+        return;
+    }
+
     const huidigGewicht =
-        Number(product.gewicht || 0);
+        Number(product.gewicht ?? 0);
 
     const huidigePorties =
-        Number(product.porties || 0);
+        Number(product.porties ?? 0);
 
-    // Controleren of we niet te veel gebruiken
     if (gebruiktGewicht > huidigGewicht) {
         alert(
             "Je kunt niet meer gewicht gebruiken dan er aanwezig is.\n\n" +
@@ -790,16 +826,14 @@ function goHome() {
     const nieuwePorties =
         huidigePorties - gebruiktePorties;
 
-    // Nieuwe voorraad opslaan
-    const { data: gewijzigdProduct, error: updateFout } = await voorraadDb
-    .from("Producten")
-    .update({
-        gewicht: nieuwGewicht,
-        porties: nieuwePorties
-    })
-    .eq("id", productId)
-    .select()
-    .single();
+    const { data: gewijzigdeRijen, error: updateFout } = await voorraadDb
+        .from("Producten")
+        .update({
+            gewicht: nieuwGewicht,
+            porties: nieuwePorties
+        })
+        .eq("id", productId)
+        .select("id, Naam, gewicht, porties");
 
     if (updateFout) {
         alert(
@@ -809,28 +843,40 @@ function goHome() {
         return;
     }
 
-    const gebruikStatus =
-    document.getElementById("gebruikStatus");
+    if (!gewijzigdeRijen || gewijzigdeRijen.length !== 1) {
+        alert(
+            "Supabase heeft geen productregel gewijzigd.\n\n" +
+            "Controleer het UPDATE-beleid van de tabel Producten."
+        );
+        return;
+    }
 
-gebruikStatus.innerHTML =
-    "✅ WIJZIGING OPGESLAGEN<br><br>" +
-    "Product: " + gewijzigdProduct.Naam + "<br>" +
-    "Nieuw gewicht: " + gewijzigdProduct.gewicht + " gram<br>" +
-    "Resterende porties: " + gewijzigdProduct.porties;
+    const gewijzigdProduct =
+        gewijzigdeRijen[0];
 
-gebruikStatus.style.marginTop = "16px";
-gebruikStatus.style.padding = "16px";
-gebruikStatus.style.borderRadius = "15px";
-gebruikStatus.style.background = "#e8f5ed";
-gebruikStatus.style.color = "#286544";
-gebruikStatus.style.fontWeight = "700";
-gebruikStatus.style.textAlign = "center";
+    const status =
+        document.getElementById("gebruikStatus");
+
+    status.innerHTML =
+        "✅ WIJZIGING OPGESLAGEN<br><br>" +
+        "Product: " + (gewijzigdProduct.Naam || "Product") + "<br>" +
+        "Nieuw gewicht: " + gewijzigdProduct.gewicht + " gram<br>" +
+        "Resterende porties: " + gewijzigdProduct.porties;
+
+    status.classList.add("visible");
 
     document.getElementById("gebruikPorties").value = "";
     document.getElementById("gebruikGewicht").value = "";
 
     await laadProductenVoorGebruik();
+
+    status.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
 }
+
+
 async function openVoorraad() {
 
     showScreen("screen-voorraad");
@@ -1454,7 +1500,7 @@ function continueToBox() {
         return;
     }
 
-    loadBox(scannedCode);
+    openDoos(scannedCode);
 }
 
 
@@ -1575,3 +1621,4 @@ async function testSupabaseVerbinding() {
 
 </body>
 </html>
+
