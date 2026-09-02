@@ -381,7 +381,7 @@ textarea {
 <!-- gewone knoppen van Voorraad hierboven -->
 
    
-    <div class="footer">VoorraadBox • versie 0.5</div>
+    <div class="footer">VoorraadBox • versie 0.6</div>
 </div>
 
 
@@ -727,13 +727,22 @@ async function laadProductenVoorGebruik() {
 
         option.value = String(product.id);
 
+        const gewichtTekst =
+            product.gewicht === null
+                ? "geen gewicht"
+                : product.gewicht + " gram";
+
+        const portiesTekst =
+            product.porties === null
+                ? "geen porties"
+                : product.porties + " porties";
+
         option.textContent =
             (product.Naam || "Product") +
             " — " +
-            (product.gewicht ?? 0) +
-            " gram — " +
-            (product.porties ?? 0) +
-            " porties";
+            gewichtTekst +
+            " — " +
+            portiesTekst;
 
         productSelect.appendChild(option);
     });
@@ -745,11 +754,11 @@ async function productGebruiken() {
     const productIdTekst =
         document.getElementById("gebruikProduct").value;
 
-    const gebruiktePorties =
-        Number(document.getElementById("gebruikPorties").value || 0);
+    const gebruiktePortiesTekst =
+        document.getElementById("gebruikPorties").value.trim();
 
-    const gebruiktGewicht =
-        Number(document.getElementById("gebruikGewicht").value || 0);
+    const gebruiktGewichtTekst =
+        document.getElementById("gebruikGewicht").value.trim();
 
     if (!productIdTekst) {
         alert("Kies eerst een product.");
@@ -763,17 +772,30 @@ async function productGebruiken() {
         return;
     }
 
+    const gebruiktePorties =
+        gebruiktePortiesTekst === ""
+            ? null
+            : Number(gebruiktePortiesTekst);
+
+    const gebruiktGewicht =
+        gebruiktGewichtTekst === ""
+            ? null
+            : Number(gebruiktGewichtTekst);
+
     if (
-        !Number.isFinite(gebruiktePorties) ||
-        !Number.isFinite(gebruiktGewicht) ||
-        gebruiktePorties < 0 ||
-        gebruiktGewicht < 0
+        (gebruiktePorties !== null &&
+            (!Number.isFinite(gebruiktePorties) || gebruiktePorties < 0)) ||
+        (gebruiktGewicht !== null &&
+            (!Number.isFinite(gebruiktGewicht) || gebruiktGewicht < 0))
     ) {
         alert("Vul geldige positieve aantallen in.");
         return;
     }
 
-    if (gebruiktePorties === 0 && gebruiktGewicht === 0) {
+    if (
+        (gebruiktePorties === null || gebruiktePorties === 0) &&
+        (gebruiktGewicht === null || gebruiktGewicht === 0)
+    ) {
         alert("Vul het aantal porties of het gebruikte gewicht in.");
         return;
     }
@@ -798,72 +820,163 @@ async function productGebruiken() {
         return;
     }
 
+    // null betekent: dit veld wordt voor dit product niet bijgehouden
     const huidigGewicht =
-        Number(product.gewicht ?? 0);
+        product.gewicht === null
+            ? null
+            : Number(product.gewicht);
 
     const huidigePorties =
-        Number(product.porties ?? 0);
+        product.porties === null
+            ? null
+            : Number(product.porties);
 
-    if (gebruiktGewicht > huidigGewicht) {
-        alert(
-            "Je kunt niet meer gewicht gebruiken dan er aanwezig is.\n\n" +
-            "Aanwezig: " + huidigGewicht + " gram"
-        );
-        return;
+    if (gebruiktGewicht !== null) {
+
+        if (huidigGewicht === null) {
+            alert(
+                "Voor dit product wordt geen gewicht bijgehouden.\n\n" +
+                "Gebruik alleen het aantal porties."
+            );
+            return;
+        }
+
+        if (gebruiktGewicht > huidigGewicht) {
+            alert(
+                "Je kunt niet meer gewicht gebruiken dan er aanwezig is.\n\n" +
+                "Aanwezig: " + huidigGewicht + " gram"
+            );
+            return;
+        }
     }
 
-    if (gebruiktePorties > huidigePorties) {
-        alert(
-            "Je kunt niet meer porties gebruiken dan er aanwezig zijn.\n\n" +
-            "Aanwezig: " + huidigePorties + " porties"
-        );
-        return;
+    if (gebruiktePorties !== null) {
+
+        if (huidigePorties === null) {
+            alert(
+                "Voor dit product worden geen porties bijgehouden.\n\n" +
+                "Gebruik alleen het gewicht."
+            );
+            return;
+        }
+
+        if (gebruiktePorties > huidigePorties) {
+            alert(
+                "Je kunt niet meer porties gebruiken dan er aanwezig zijn.\n\n" +
+                "Aanwezig: " + huidigePorties + " porties"
+            );
+            return;
+        }
     }
 
     const nieuwGewicht =
-        huidigGewicht - gebruiktGewicht;
+        huidigGewicht === null
+            ? null
+            : huidigGewicht - (gebruiktGewicht ?? 0);
 
     const nieuwePorties =
-        huidigePorties - gebruiktePorties;
+        huidigePorties === null
+            ? null
+            : huidigePorties - (gebruiktePorties ?? 0);
 
-    const { data: gewijzigdeRijen, error: updateFout } = await voorraadDb
-        .from("Producten")
-        .update({
-            gewicht: nieuwGewicht,
-            porties: nieuwePorties
-        })
-        .eq("id", productId)
-        .select("id, Naam, gewicht, porties");
+    // Verwijder alleen als ALLE daadwerkelijk bijgehouden hoeveelheden op 0 staan.
+    // Voorbeelden:
+    // gewicht=0, porties=null  -> verwijderen
+    // gewicht=null, porties=0  -> verwijderen
+    // gewicht=0, porties=2     -> NIET verwijderen
+    // gewicht=299, porties=0   -> NIET verwijderen
+    const gewichtLeeg =
+        huidigGewicht === null || nieuwGewicht === 0;
 
-    if (updateFout) {
-        alert(
-            "De voorraad kon niet worden aangepast:\n\n" +
-            updateFout.message
-        );
-        return;
-    }
+    const portiesLeeg =
+        huidigePorties === null || nieuwePorties === 0;
 
-    if (!gewijzigdeRijen || gewijzigdeRijen.length !== 1) {
-        alert(
-            "Supabase heeft geen productregel gewijzigd.\n\n" +
-            "Controleer het UPDATE-beleid van de tabel Producten."
-        );
-        return;
-    }
-
-    const gewijzigdProduct =
-        gewijzigdeRijen[0];
+    const moetVerwijderen =
+        gewichtLeeg &&
+        portiesLeeg &&
+        (huidigGewicht !== null || huidigePorties !== null);
 
     const status =
         document.getElementById("gebruikStatus");
 
-    status.innerHTML =
-        "✅ WIJZIGING OPGESLAGEN<br><br>" +
-        "Product: " + (gewijzigdProduct.Naam || "Product") + "<br>" +
-        "Nieuw gewicht: " + gewijzigdProduct.gewicht + " gram<br>" +
-        "Resterende porties: " + gewijzigdProduct.porties;
+    if (moetVerwijderen) {
 
-    status.classList.add("visible");
+        const { data: verwijderdeRijen, error: deleteFout } = await voorraadDb
+            .from("Producten")
+            .delete()
+            .eq("id", productId)
+            .select("id, Naam");
+
+        if (deleteFout) {
+            alert(
+                "Het lege product kon niet worden verwijderd:\n\n" +
+                deleteFout.message
+            );
+            return;
+        }
+
+        if (!verwijderdeRijen || verwijderdeRijen.length !== 1) {
+            alert(
+                "Het product is leeg, maar Supabase heeft geen productregel verwijderd."
+            );
+            return;
+        }
+
+        status.innerHTML =
+            "🗑️ PRODUCT VERWIJDERD<br><br>" +
+            "Product: " + (product.Naam || "Product") + "<br>" +
+            "De bijgehouden voorraad is volledig op.";
+
+        status.classList.add("visible");
+
+    } else {
+
+        const { data: gewijzigdeRijen, error: updateFout } = await voorraadDb
+            .from("Producten")
+            .update({
+                gewicht: nieuwGewicht,
+                porties: nieuwePorties
+            })
+            .eq("id", productId)
+            .select("id, Naam, gewicht, porties");
+
+        if (updateFout) {
+            alert(
+                "De voorraad kon niet worden aangepast:\n\n" +
+                updateFout.message
+            );
+            return;
+        }
+
+        if (!gewijzigdeRijen || gewijzigdeRijen.length !== 1) {
+            alert(
+                "Supabase heeft geen productregel gewijzigd.\n\n" +
+                "Controleer het UPDATE-beleid van de tabel Producten."
+            );
+            return;
+        }
+
+        const gewijzigdProduct =
+            gewijzigdeRijen[0];
+
+        const gewichtTekst =
+            gewijzigdProduct.gewicht === null
+                ? "Niet bijgehouden"
+                : gewijzigdProduct.gewicht + " gram";
+
+        const portiesTekst =
+            gewijzigdProduct.porties === null
+                ? "Niet bijgehouden"
+                : gewijzigdProduct.porties;
+
+        status.innerHTML =
+            "✅ WIJZIGING OPGESLAGEN<br><br>" +
+            "Product: " + (gewijzigdProduct.Naam || "Product") + "<br>" +
+            "Nieuw gewicht: " + gewichtTekst + "<br>" +
+            "Resterende porties: " + portiesTekst;
+
+        status.classList.add("visible");
+    }
 
     document.getElementById("gebruikPorties").value = "";
     document.getElementById("gebruikGewicht").value = "";
@@ -973,8 +1086,8 @@ async function openVoorraad() {
 
             productRegel.innerHTML = `
                 <strong>🥩 ${product.Naam || "Product"}</strong><br>
-                Porties: ${product.porties ?? "-"}<br>
-                Gewicht: ${product.gewicht ?? "-"} gram<br>
+                Porties: ${product.porties === null ? "niet bijgehouden" : product.porties}<br>
+                Gewicht: ${product.gewicht === null ? "niet bijgehouden" : product.gewicht + " gram"}<br>
                 Ingevroren: ${product.invriesdatum || "-"}<br>
                 Houdbaar tot: ${product.houdbaar_tot || "-"}
                 ${product.notitie
@@ -1621,4 +1734,5 @@ async function testSupabaseVerbinding() {
 
 </body>
 </html>
+
 
