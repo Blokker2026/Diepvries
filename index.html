@@ -378,10 +378,20 @@ textarea {
         </div>
     </div>
 </button>
+
+    <button class="main-button" onclick="openDoosLeeg()">
+        <div class="icon">🗑️</div>
+        <div>
+            <div class="button-title">Doos leeg</div>
+            <div class="button-description">
+                Verwijder alle producten uit een doos
+            </div>
+        </div>
+    </button>
 <!-- gewone knoppen van Voorraad hierboven -->
 
    
-    <div class="footer">VoorraadBox • versie 0.9</div>
+    <div class="footer">VoorraadBox • versie 1.0</div>
 </div>
 
 
@@ -452,11 +462,11 @@ textarea {
 
     <div class="card">
 
-        <label>Notitie bij deze doos</label>
+        <label>Kenmerk doos</label>
 
         <textarea
         id="boxNote"
-        placeholder="Bijvoorbeeld: eerst gebruiken, restje saus, voor weekend..."></textarea>
+        placeholder="Bijvoorbeeld: blauwe deksel, doorzichtig, hoge bak..."></textarea>
 
     </div>
 
@@ -567,6 +577,47 @@ textarea {
 
 </div>
     
+
+<!-- ============================ -->
+<!-- SCHERM: DOOS LEEG -->
+<!-- ============================ -->
+
+<div id="doosLeegScreen" class="screen">
+
+    <button class="back-button" onclick="goHome()">
+        ← Terug
+    </button>
+
+    <h2 class="title">🗑️ Doos leeg</h2>
+
+    <div class="help">
+        Kies de doos die je volledig wilt leegmaken.
+        De doos zelf, locatie en het kenmerk van de doos blijven bewaard.
+    </div>
+
+    <div class="card">
+
+        <label for="doosLeegNummer">Doosnummer</label>
+        <select id="doosLeegNummer">
+            <option value="">Kies een doos...</option>
+        </select>
+
+        <div id="doosLeegInhoud" style="display:none;margin-top:8px;"></div>
+
+        <button
+            id="doosLeegKnop"
+            class="danger-button"
+            onclick="maakDoosLeeg()"
+            style="display:none;margin-top:18px;">
+            🗑️ DOOS LEEGMAKEN
+        </button>
+
+    </div>
+
+    <div id="doosLeegStatus" class="status"></div>
+
+</div>
+
 
 <!-- QR GENERATOR -->
 
@@ -1086,6 +1137,225 @@ async function ruimLegeProductenOp() {
             );
         }
     }
+}
+
+
+async function openDoosLeeg() {
+
+    showScreen("doosLeegScreen");
+
+    await ruimLegeProductenOp();
+
+    const doosSelect = document.getElementById("doosLeegNummer");
+    const inhoud = document.getElementById("doosLeegInhoud");
+    const knop = document.getElementById("doosLeegKnop");
+    const status = document.getElementById("doosLeegStatus");
+
+    doosSelect.innerHTML =
+        '<option value="">Kies een doos...</option>';
+
+    inhoud.style.display = "none";
+    inhoud.innerHTML = "";
+    knop.style.display = "none";
+    status.classList.remove("visible");
+    status.innerHTML = "";
+
+    const { data: dozen, error } = await voorraadDb
+        .from("dozen")
+        .select("doosnummer, locatie")
+        .order("doosnummer", { ascending: true });
+
+    if (error) {
+        alert(
+            "De dozen konden niet worden geladen:\n\n" +
+            error.message
+        );
+        return;
+    }
+
+    (dozen || []).forEach(doos => {
+        const option = document.createElement("option");
+        option.value = doos.doosnummer;
+        option.textContent =
+            doos.doosnummer + " - " + (doos.locatie || "Geen locatie");
+        doosSelect.appendChild(option);
+    });
+
+    doosSelect.onchange = laadDoosVoorLeegmaken;
+}
+
+
+async function laadDoosVoorLeegmaken() {
+
+    const doosnummer =
+        document.getElementById("doosLeegNummer").value;
+
+    const inhoud =
+        document.getElementById("doosLeegInhoud");
+
+    const knop =
+        document.getElementById("doosLeegKnop");
+
+    const status =
+        document.getElementById("doosLeegStatus");
+
+    inhoud.style.display = "none";
+    inhoud.innerHTML = "";
+    knop.style.display = "none";
+    status.classList.remove("visible");
+    status.innerHTML = "";
+
+    if (!doosnummer) {
+        return;
+    }
+
+    const { data: producten, error } = await voorraadDb
+        .from("Producten")
+        .select("id, Naam, gewicht, porties")
+        .eq("doosnummer", doosnummer)
+        .order("id", { ascending: true });
+
+    if (error) {
+        alert(
+            "De inhoud van de doos kon niet worden geladen:\n\n" +
+            error.message
+        );
+        return;
+    }
+
+    inhoud.style.display = "block";
+
+    if (!producten || producten.length === 0) {
+        inhoud.innerHTML =
+            '<div style="padding:14px 0;color:#718187;">' +
+            'Deze doos is al leeg.' +
+            '</div>';
+        return;
+    }
+
+    let html =
+        '<div style="margin-top:18px;font-weight:700;">' +
+        'Producten die worden verwijderd:</div>' +
+        '<div style="margin-top:10px;">';
+
+    producten.forEach(product => {
+
+        const gewichtTekst =
+            product.gewicht === null
+                ? "gewicht niet bijgehouden"
+                : product.gewicht + " gram";
+
+        const portiesTekst =
+            product.porties === null
+                ? "porties niet bijgehouden"
+                : product.porties + " porties";
+
+        html +=
+            '<div style="padding:10px 0;border-bottom:1px solid #e0e7e8;">' +
+            '<strong>🥩 ' + escapeHtml(product.Naam || "Product") + '</strong><br>' +
+            '<span style="color:#718187;font-size:14px;">' +
+            escapeHtml(gewichtTekst) + ' • ' + escapeHtml(portiesTekst) +
+            '</span></div>';
+    });
+
+    html += '</div>';
+
+    inhoud.innerHTML = html;
+    knop.style.display = "block";
+}
+
+
+async function maakDoosLeeg() {
+
+    const doosnummer =
+        document.getElementById("doosLeegNummer").value;
+
+    if (!doosnummer) {
+        alert("Kies eerst een doos.");
+        return;
+    }
+
+    const { data: producten, error: leesFout } = await voorraadDb
+        .from("Producten")
+        .select("id, Naam")
+        .eq("doosnummer", doosnummer);
+
+    if (leesFout) {
+        alert(
+            "De inhoud van de doos kon niet worden gecontroleerd:\n\n" +
+            leesFout.message
+        );
+        return;
+    }
+
+    if (!producten || producten.length === 0) {
+        alert("Deze doos is al leeg.");
+        await laadDoosVoorLeegmaken();
+        return;
+    }
+
+    const bevestigd = confirm(
+        "Weet je zeker dat je " + doosnummer + " volledig wilt leegmaken?\n\n" +
+        "Alle " + producten.length + " product(en) in deze doos worden verwijderd.\n\n" +
+        "De doos zelf, locatie en het kenmerk van de doos blijven bewaard."
+    );
+
+    if (!bevestigd) {
+        return;
+    }
+
+    const { data: verwijderdeRijen, error: deleteFout } = await voorraadDb
+        .from("Producten")
+        .delete()
+        .eq("doosnummer", doosnummer)
+        .select("id");
+
+    if (deleteFout) {
+        alert(
+            "De doos kon niet worden leeggemaakt:\n\n" +
+            deleteFout.message
+        );
+        return;
+    }
+
+    if (!verwijderdeRijen || verwijderdeRijen.length !== producten.length) {
+        alert(
+            "Niet alle producten zijn verwijderd.\n\n" +
+            "Verwacht: " + producten.length +
+            "\nVerwijderd: " + (verwijderdeRijen ? verwijderdeRijen.length : 0)
+        );
+        await laadDoosVoorLeegmaken();
+        return;
+    }
+
+    const status =
+        document.getElementById("doosLeegStatus");
+
+    status.innerHTML =
+        "✅ DOOS LEEG<br><br>" +
+        escapeHtml(doosnummer) + " is leeggemaakt.<br>" +
+        verwijderdeRijen.length + " product(en) verwijderd.<br>" +
+        "De doosgegevens zijn bewaard.";
+
+    status.classList.add("visible");
+
+    document.getElementById("doosLeegInhoud").style.display = "none";
+    document.getElementById("doosLeegKnop").style.display = "none";
+
+    status.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+}
+
+
+function escapeHtml(tekst) {
+    return String(tekst)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
 
 
