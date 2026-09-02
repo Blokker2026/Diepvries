@@ -809,10 +809,22 @@ function goHome() {
         return;
     }
 
-    document.getElementById("gebruikStatus").innerHTML =
-        "✅ Voorraad aangepast.<br>" +
-        "Nieuw gewicht: " + nieuwGewicht + " gram<br>" +
-        "Resterende porties: " + nieuwePorties;
+    const gebruikStatus =
+    document.getElementById("gebruikStatus");
+
+gebruikStatus.innerHTML =
+    "✅ WIJZIGING OPGESLAGEN<br><br>" +
+    "Product: " + gewijzigdProduct.Naam + "<br>" +
+    "Nieuw gewicht: " + gewijzigdProduct.gewicht + " gram<br>" +
+    "Resterende porties: " + gewijzigdProduct.porties;
+
+gebruikStatus.style.marginTop = "16px";
+gebruikStatus.style.padding = "16px";
+gebruikStatus.style.borderRadius = "15px";
+gebruikStatus.style.background = "#e8f5ed";
+gebruikStatus.style.color = "#286544";
+gebruikStatus.style.fontWeight = "700";
+gebruikStatus.style.textAlign = "center";
 
     document.getElementById("gebruikPorties").value = "";
     document.getElementById("gebruikGewicht").value = "";
