@@ -613,33 +613,75 @@ async function openVoorraad() {
         return;
     }
 
-    dozen.forEach(doos => {
+    for (const doos of dozen) {
 
-        const kaart =
+    const kaart =
+        document.createElement("div");
+
+    kaart.className = "card";
+
+    kaart.innerHTML = `
+        <div style="font-size:20px;font-weight:700;margin-bottom:8px;">
+            📦 ${doos.doosnummer || "Onbekende doos"}
+        </div>
+
+        <div style="margin-bottom:6px;">
+            📍 ${doos.locatie || "Geen locatie"}
+        </div>
+
+        <div style="margin-bottom:6px;">
+            Status: ${doos.status || "actief"}
+        </div>
+
+        <div style="color:#718187;font-size:14px;margin-bottom:12px;">
+            ${doos.notitie || ""}
+        </div>
+    `;
+
+    const { data: producten, error: productError } = await voorraadDb
+        .from("Producten")
+        .select("*")
+        .eq("doosnummer", doos.doosnummer);
+
+    if (productError) {
+        console.log("Fout bij laden producten:", productError);
+    }
+
+    if (producten && producten.length > 0) {
+
+        const productBlok =
             document.createElement("div");
 
-        kaart.className = "card";
+        productBlok.style.marginTop = "14px";
+        productBlok.style.paddingTop = "12px";
+        productBlok.style.borderTop = "1px solid #e0e7e8";
 
-        kaart.innerHTML = `
-            <div style="font-size:20px;font-weight:700;margin-bottom:8px;">
-                📦 ${doos.doosnummer || "Onbekende doos"}
-            </div>
+        producten.forEach(product => {
 
-            <div style="margin-bottom:6px;">
-                📍 ${doos.locatie || "Geen locatie"}
-            </div>
+            const productRegel =
+                document.createElement("div");
 
-            <div style="margin-bottom:6px;">
-                Status: ${doos.status || "actief"}
-            </div>
+            productRegel.style.marginBottom = "12px";
 
-            <div style="color:#718187;font-size:14px;">
-                ${doos.notitie || ""}
-            </div>
-        `;
+            productRegel.innerHTML = `
+                <strong>🥩 ${product.Naam || "Product"}</strong><br>
+                Porties: ${product.porties ?? "-"}<br>
+                Gewicht: ${product.gewicht ?? "-"} gram<br>
+                Ingevroren: ${product.invriesdatum || "-"}<br>
+                Houdbaar tot: ${product.houdbaar_tot || "-"}
+                ${product.notitie
+                    ? `<br>📝 ${product.notitie}`
+                    : ""}
+            `;
 
-        lijst.appendChild(kaart);
-    });
+            productBlok.appendChild(productRegel);
+        });
+
+        kaart.appendChild(productBlok);
+    }
+
+    lijst.appendChild(kaart);
+}
 }
 
 /* NIEUWE DOOS */
