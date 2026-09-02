@@ -381,7 +381,7 @@ textarea {
 <!-- gewone knoppen van Voorraad hierboven -->
 
    
-    <div class="footer">VoorraadBox • versie 0.8</div>
+    <div class="footer">VoorraadBox • versie 0.9</div>
 </div>
 
 
@@ -452,11 +452,11 @@ textarea {
 
     <div class="card">
 
-       <label>Kenmerk doos</label>
+        <label>Notitie bij deze doos</label>
 
         <textarea
         id="boxNote"
-       placeholder="Bijvoorbeeld: blauwe deksel, doorzichtig, hoge bak..."></textarea>
+        placeholder="Bijvoorbeeld: eerst gebruiken, restje saus, voor weekend..."></textarea>
 
     </div>
 
@@ -1319,7 +1319,7 @@ function addProduct(data = {}) {
         <div class="row">
 
             <div>
-               <label>Aantal porties (optioneel)</label>
+                <label>Aantal porties</label>
 
                 <input
                 class="product-portions"
@@ -1329,7 +1329,7 @@ function addProduct(data = {}) {
             </div>
 
             <div>
-                <label>Gewicht in gram (optioneel)</label>
+                <label>Gewicht in gram</label>
 
                 <input
                 class="product-weight"
@@ -1405,8 +1405,93 @@ async function saveBox() {
     const productCards =
         document.querySelectorAll(".product-card");
 
+
     // -----------------------------
-    // 1. CONTROLEREN OF DOOS BESTAAT
+    // 1. PRODUCTEN EERST CONTROLEREN
+    // -----------------------------
+
+    const producten = [];
+
+    for (const card of productCards) {
+
+        const naam =
+            card.querySelector(".product-name").value.trim();
+
+        const porties =
+            card.querySelector(".product-portions").value;
+
+        const gewicht =
+            card.querySelector(".product-weight").value;
+
+        const invriesdatum =
+            card.querySelector(".product-freeze").value;
+
+        const houdbaarTot =
+            card.querySelector(".product-expiry").value;
+
+        const notitie =
+            card.querySelector(".product-note").value;
+
+        const productRegelIsHelemaalLeeg =
+            !naam &&
+            !porties &&
+            !gewicht &&
+            !notitie;
+
+        if (productRegelIsHelemaalLeeg) {
+            continue;
+        }
+
+        if (!naam) {
+            alert(
+                "Vul bij ieder product eerst een productnaam in."
+            );
+            return;
+        }
+
+        if (!porties && !gewicht) {
+            alert(
+                "Vul bij ieder product minimaal het aantal porties of het gewicht in."
+            );
+            return;
+        }
+
+        const portiesGetal =
+            porties === ""
+                ? null
+                : Number(porties);
+
+        const gewichtGetal =
+            gewicht === ""
+                ? null
+                : Number(gewicht);
+
+        if (
+            (portiesGetal !== null &&
+                (!Number.isFinite(portiesGetal) || portiesGetal < 0)) ||
+            (gewichtGetal !== null &&
+                (!Number.isFinite(gewichtGetal) || gewichtGetal < 0))
+        ) {
+            alert(
+                "Vul geldige positieve waarden in voor porties en gewicht."
+            );
+            return;
+        }
+
+        producten.push({
+            doosnummer: boxId,
+            Naam: naam,
+            porties: portiesGetal,
+            gewicht: gewichtGetal,
+            invriesdatum: invriesdatum || null,
+            houdbaar_tot: houdbaarTot || null,
+            notitie: notitie
+        });
+    }
+
+
+    // -----------------------------
+    // 2. CONTROLEREN OF DOOS BESTAAT
     // -----------------------------
 
     const { data: bestaandeDoos, error: zoekFout } = await voorraadDb
@@ -1423,8 +1508,9 @@ async function saveBox() {
         return;
     }
 
+
     // -----------------------------
-    // 2. DOOS TOEVOEGEN OF WIJZIGEN
+    // 3. DOOS TOEVOEGEN OF WIJZIGEN
     // -----------------------------
 
     if (bestaandeDoos) {
@@ -1465,61 +1551,6 @@ async function saveBox() {
         }
     }
 
-    // -----------------------------
-    // 3. PRODUCTEN VERZAMELEN
-    // -----------------------------
-
-   const producten = [];
-
-let productFoutGevonden = false;
-
-for (const card of productCards) {
-
-    const naam =
-        card.querySelector(".product-name").value.trim();
-
-    if (!naam) {
-        continue;
-    }
-
-    const porties =
-        card.querySelector(".product-portions").value;
-
-    const gewicht =
-        card.querySelector(".product-weight").value;
-
-    if (!porties && !gewicht) {
-        alert(
-            "Vul bij ieder product minimaal het aantal porties of het gewicht in."
-        );
-
-        productFoutGevonden = true;
-        break;
-    }
-
-    const invriesdatum =
-        card.querySelector(".product-freeze").value;
-
-    const houdbaarTot =
-        card.querySelector(".product-expiry").value;
-
-    const notitie =
-        card.querySelector(".product-note").value;
-
-    producten.push({
-        doosnummer: boxId,
-        Naam: naam,
-        porties: porties ? Number(porties) : null,
-        gewicht: gewicht ? Number(gewicht) : null,
-        invriesdatum: invriesdatum || null,
-        houdbaar_tot: houdbaarTot || null,
-        notitie: notitie
-    });
-}
-
-if (productFoutGevonden) {
-    return;
-}
 
     // -----------------------------
     // 4. OUDE PRODUCTEN VERWIJDEREN
@@ -1537,6 +1568,7 @@ if (productFoutGevonden) {
         );
         return;
     }
+
 
     // -----------------------------
     // 5. NIEUWE PRODUCTLIJST OPSLAAN
@@ -1556,6 +1588,7 @@ if (productFoutGevonden) {
             return;
         }
     }
+
 
     // -----------------------------
     // 6. BEVESTIGING
