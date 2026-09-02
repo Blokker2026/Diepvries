@@ -395,10 +395,20 @@ textarea {
             <div class="button-description">Vul een bestaande lege doos opnieuw</div>
         </div>
     </button>
+
+    <button class="main-button" onclick="openProductWijzigen()">
+        <div class="icon">✏️</div>
+        <div>
+            <div class="button-title">Product wijzigen</div>
+            <div class="button-description">
+                Pas de gegevens van een bestaand product aan
+            </div>
+        </div>
+    </button>
 <!-- gewone knoppen van Voorraad hierboven -->
 
    
-    <div class="footer">VoorraadBox • versie 1.1</div>
+    <div class="footer">VoorraadBox • versie 1.2</div>
 </div>
 
 
@@ -644,6 +654,82 @@ textarea {
     </div>
     <div id="opnieuwStatus" class="status"></div>
 </div>
+
+
+<!-- ============================ -->
+<!-- SCHERM: PRODUCT WIJZIGEN -->
+<!-- ============================ -->
+
+<div id="productWijzigenScreen" class="screen">
+
+    <button class="back-button" onclick="goHome()">← Terug</button>
+
+    <h2 class="title">✏️ Product wijzigen</h2>
+
+    <div class="help">
+        Kies eerst een doos en daarna het product dat je wilt aanpassen.
+    </div>
+
+    <div class="card">
+
+        <label for="wijzigDoosnummer">Doosnummer</label>
+        <select id="wijzigDoosnummer">
+            <option value="">Kies een doos...</option>
+        </select>
+
+        <label for="wijzigProduct">Product</label>
+        <select id="wijzigProduct">
+            <option value="">Kies eerst een doos...</option>
+        </select>
+
+    </div>
+
+    <div id="wijzigProductForm" class="card" style="display:none;">
+
+        <label for="wijzigNaam">Productnaam</label>
+        <input id="wijzigNaam" type="text">
+
+        <div class="row">
+
+            <div>
+                <label for="wijzigPorties">Aantal porties (optioneel)</label>
+                <input id="wijzigPorties" type="number" min="0">
+            </div>
+
+            <div>
+                <label for="wijzigGewicht">Gewicht in gram (optioneel)</label>
+                <input id="wijzigGewicht" type="number" min="0">
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <div>
+                <label for="wijzigInvriesdatum">Invriesdatum</label>
+                <input id="wijzigInvriesdatum" type="date">
+            </div>
+
+            <div>
+                <label for="wijzigHoudbaarTot">Houdbaar tot (optioneel)</label>
+                <input id="wijzigHoudbaarTot" type="date">
+            </div>
+
+        </div>
+
+        <label for="wijzigNotitie">Notitie bij product (optioneel)</label>
+        <textarea id="wijzigNotitie"></textarea>
+
+        <button class="primary-button" onclick="saveProductWijziging()">
+            💾 WIJZIGING OPSLAAN
+        </button>
+
+    </div>
+
+    <div id="wijzigProductStatus" class="status"></div>
+
+</div>
+
 
 <!-- QR GENERATOR -->
 
@@ -1165,6 +1251,357 @@ async function ruimLegeProductenOp() {
     }
 }
 
+
+
+
+async function openProductWijzigen() {
+
+    showScreen("productWijzigenScreen");
+
+    await ruimLegeProductenOp();
+
+    const doosSelect =
+        document.getElementById("wijzigDoosnummer");
+
+    const productSelect =
+        document.getElementById("wijzigProduct");
+
+    const formulier =
+        document.getElementById("wijzigProductForm");
+
+    const status =
+        document.getElementById("wijzigProductStatus");
+
+    doosSelect.innerHTML =
+        '<option value="">Kies een doos...</option>';
+
+    productSelect.innerHTML =
+        '<option value="">Kies eerst een doos...</option>';
+
+    formulier.style.display = "none";
+
+    status.classList.remove("visible");
+    status.innerHTML = "";
+
+    const { data: dozen, error } = await voorraadDb
+        .from("dozen")
+        .select("doosnummer, locatie")
+        .order("doosnummer", { ascending: true });
+
+    if (error) {
+        alert(
+            "De dozen konden niet worden geladen:\n\n" +
+            error.message
+        );
+        return;
+    }
+
+    (dozen || []).forEach(doos => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = doos.doosnummer;
+
+        option.textContent =
+            doos.doosnummer +
+            " - " +
+            (doos.locatie || "Geen locatie");
+
+        doosSelect.appendChild(option);
+    });
+
+    doosSelect.onchange =
+        laadProductenVoorWijzigen;
+
+    productSelect.onchange =
+        laadProductVoorWijzigen;
+}
+
+
+async function laadProductenVoorWijzigen() {
+
+    const doosnummer =
+        document.getElementById("wijzigDoosnummer").value;
+
+    const productSelect =
+        document.getElementById("wijzigProduct");
+
+    const formulier =
+        document.getElementById("wijzigProductForm");
+
+    const status =
+        document.getElementById("wijzigProductStatus");
+
+    productSelect.innerHTML =
+        '<option value="">Kies een product...</option>';
+
+    formulier.style.display = "none";
+
+    status.classList.remove("visible");
+    status.innerHTML = "";
+
+    if (!doosnummer) {
+        productSelect.innerHTML =
+            '<option value="">Kies eerst een doos...</option>';
+        return;
+    }
+
+    const { data: producten, error } = await voorraadDb
+        .from("Producten")
+        .select("id, Naam, gewicht, porties")
+        .eq("doosnummer", doosnummer)
+        .order("id", { ascending: true });
+
+    if (error) {
+        alert(
+            "De producten konden niet worden geladen:\n\n" +
+            error.message
+        );
+        return;
+    }
+
+    if (!producten || producten.length === 0) {
+
+        productSelect.innerHTML =
+            '<option value="">Deze doos bevat geen producten</option>';
+
+        return;
+    }
+
+    producten.forEach(product => {
+
+        const option =
+            document.createElement("option");
+
+        option.value =
+            String(product.id);
+
+        const gewichtTekst =
+            product.gewicht === null
+                ? "geen gewicht"
+                : product.gewicht + " gram";
+
+        const portiesTekst =
+            product.porties === null
+                ? "geen porties"
+                : product.porties + " porties";
+
+        option.textContent =
+            (product.Naam || "Product") +
+            " — " +
+            gewichtTekst +
+            " — " +
+            portiesTekst;
+
+        productSelect.appendChild(option);
+    });
+}
+
+
+async function laadProductVoorWijzigen() {
+
+    const productIdTekst =
+        document.getElementById("wijzigProduct").value;
+
+    const formulier =
+        document.getElementById("wijzigProductForm");
+
+    const status =
+        document.getElementById("wijzigProductStatus");
+
+    status.classList.remove("visible");
+    status.innerHTML = "";
+
+    if (!productIdTekst) {
+        formulier.style.display = "none";
+        return;
+    }
+
+    const productId =
+        Number(productIdTekst);
+
+    const { data: product, error } = await voorraadDb
+        .from("Producten")
+        .select("id, Naam, doosnummer, porties, gewicht, invriesdatum, houdbaar_tot, notitie")
+        .eq("id", productId)
+        .maybeSingle();
+
+    if (error) {
+        alert(
+            "Het product kon niet worden geladen:\n\n" +
+            error.message
+        );
+        formulier.style.display = "none";
+        return;
+    }
+
+    if (!product) {
+        alert("Het gekozen product bestaat niet meer.");
+        formulier.style.display = "none";
+        await laadProductenVoorWijzigen();
+        return;
+    }
+
+    document.getElementById("wijzigNaam").value =
+        product.Naam || "";
+
+    document.getElementById("wijzigPorties").value =
+        product.porties === null
+            ? ""
+            : product.porties;
+
+    document.getElementById("wijzigGewicht").value =
+        product.gewicht === null
+            ? ""
+            : product.gewicht;
+
+    document.getElementById("wijzigInvriesdatum").value =
+        product.invriesdatum || "";
+
+    document.getElementById("wijzigHoudbaarTot").value =
+        product.houdbaar_tot || "";
+
+    document.getElementById("wijzigNotitie").value =
+        product.notitie || "";
+
+    formulier.dataset.productId =
+        String(product.id);
+
+    formulier.style.display = "block";
+}
+
+
+async function saveProductWijziging() {
+
+    const formulier =
+        document.getElementById("wijzigProductForm");
+
+    const productId =
+        Number(formulier.dataset.productId);
+
+    if (!Number.isInteger(productId)) {
+        alert("Kies eerst een product.");
+        return;
+    }
+
+    const naam =
+        document.getElementById("wijzigNaam").value.trim();
+
+    const portiesWaarde =
+        document.getElementById("wijzigPorties").value;
+
+    const gewichtWaarde =
+        document.getElementById("wijzigGewicht").value;
+
+    const invriesdatum =
+        document.getElementById("wijzigInvriesdatum").value;
+
+    const houdbaarTot =
+        document.getElementById("wijzigHoudbaarTot").value;
+
+    const notitie =
+        document.getElementById("wijzigNotitie").value.trim();
+
+    if (!naam) {
+        alert("Vul een productnaam in.");
+        return;
+    }
+
+    if (portiesWaarde === "" && gewichtWaarde === "") {
+        alert(
+            "Vul minimaal het aantal porties of het gewicht in."
+        );
+        return;
+    }
+
+    const porties =
+        portiesWaarde === ""
+            ? null
+            : Number(portiesWaarde);
+
+    const gewicht =
+        gewichtWaarde === ""
+            ? null
+            : Number(gewichtWaarde);
+
+    if (
+        porties !== null &&
+        (!Number.isFinite(porties) || porties < 0)
+    ) {
+        alert("Vul een geldig aantal porties in.");
+        return;
+    }
+
+    if (
+        gewicht !== null &&
+        (!Number.isFinite(gewicht) || gewicht < 0)
+    ) {
+        alert("Vul een geldig gewicht in.");
+        return;
+    }
+
+    const { data: gewijzigdeRijen, error } = await voorraadDb
+        .from("Producten")
+        .update({
+            Naam: naam,
+            porties: porties,
+            gewicht: gewicht,
+            invriesdatum: invriesdatum || null,
+            houdbaar_tot: houdbaarTot || null,
+            notitie: notitie
+        })
+        .eq("id", productId)
+        .select("id, Naam, porties, gewicht");
+
+    if (error) {
+        alert(
+            "Het product kon niet worden gewijzigd:\n\n" +
+            error.message
+        );
+        return;
+    }
+
+    if (!gewijzigdeRijen || gewijzigdeRijen.length !== 1) {
+        alert(
+            "Supabase heeft geen productregel gewijzigd."
+        );
+        return;
+    }
+
+    const gewijzigd =
+        gewijzigdeRijen[0];
+
+    const gewichtTekst =
+        gewijzigd.gewicht === null
+            ? "niet bijgehouden"
+            : gewijzigd.gewicht + " gram";
+
+    const portiesTekst =
+        gewijzigd.porties === null
+            ? "niet bijgehouden"
+            : gewijzigd.porties;
+
+    const status =
+        document.getElementById("wijzigProductStatus");
+
+    status.innerHTML =
+        "✅ PRODUCT GEWIJZIGD<br><br>" +
+        "Product: " + escapeHtml(gewijzigd.Naam || "Product") + "<br>" +
+        "Gewicht: " + escapeHtml(gewichtTekst) + "<br>" +
+        "Porties: " + escapeHtml(String(portiesTekst));
+
+    status.classList.add("visible");
+
+    await laadProductenVoorWijzigen();
+
+    formulier.style.display = "none";
+
+    status.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+}
 
 
 async function openOpnieuwVullen() {
