@@ -631,7 +631,10 @@ function showScreen(id) {
 
 function goHome() {
     showScreen("homeScreen");
-}async function openGebruiken() {
+}
+    
+       
+    async function openGebruiken() {
 
     showScreen("gebruikenScreen");
 
@@ -675,6 +678,54 @@ function goHome() {
     doosSelect.onchange = laadProductenVoorGebruik;
 }
 
+    async function laadProductenVoorGebruik() {
+
+    async function laadProductenVoorGebruik() {
+
+    const doosnummer =
+        document.getElementById("gebruikDoosnummer").value;
+
+    const productSelect =
+        document.getElementById("gebruikProduct");
+
+    productSelect.innerHTML =
+        '<option value="">Kies een product...</option>';
+
+    if (!doosnummer) {
+        return;
+    }
+
+    const { data: producten, error } = await voorraadDb
+        .from("Producten")
+        .select("*")
+        .eq("doosnummer", doosnummer);
+
+    if (error) {
+        alert(
+            "De producten konden niet worden geladen:\n\n" +
+            error.message
+        );
+        return;
+    }
+
+    producten.forEach(product => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = product.id;
+
+        option.textContent =
+            product.Naam +
+            " — " +
+            (product.gewicht ?? "-") +
+            " gram — " +
+            (product.porties ?? "-") +
+            " porties";
+
+        productSelect.appendChild(option);
+    });
+}
 
    
 async function openVoorraad() {
