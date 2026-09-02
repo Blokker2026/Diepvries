@@ -369,6 +369,15 @@ textarea {
             </div>
         </div>
     </button>
+    <button class="main-button" onclick="openGebruiken()">
+    <div class="icon">🍽️</div>
+    <div>
+        <div class="button-title">Gebruiken</div>
+        <div class="button-description">
+            Haal een deel van een product uit de voorraad
+        </div>
+    </div>
+</button>
 <!-- gewone knoppen van Voorraad hierboven -->
 
    
@@ -494,6 +503,70 @@ textarea {
 
 </div>
 
+<!-- ============================ -->
+<!-- SCHERM: GEBRUIKEN -->
+<!-- ============================ -->
+
+<div id="gebruikenScreen" class="screen">
+
+    <button class="back-button" onclick="goHome()">
+        ← Terug
+    </button>
+
+    <h2 class="title">🍽️ Product gebruiken</h2>
+
+    <div class="help">
+        Kies een doos en geef aan hoeveel je uit de voorraad gebruikt.
+    </div>
+
+    <div class="card">
+
+        <label for="gebruikDoosnummer">Doosnummer</label>
+        <select id="gebruikDoosnummer">
+            <option value="">Kies een doos...</option>
+        </select>
+
+        <br><br>
+
+        <label for="gebruikProduct">Product</label>
+        <select id="gebruikProduct">
+            <option value="">Kies eerst een doos...</option>
+        </select>
+
+        <br><br>
+
+        <label for="gebruikPorties">Aantal porties gebruiken</label>
+        <input
+            type="number"
+            id="gebruikPorties"
+            min="0"
+            step="1"
+            placeholder="Bijvoorbeeld 1"
+        >
+
+        <br><br>
+
+        <label for="gebruikGewicht">Gewicht gebruiken (gram)</label>
+        <input
+            type="number"
+            id="gebruikGewicht"
+            min="0"
+            step="1"
+            placeholder="Bijvoorbeeld 150"
+        >
+
+        <br><br>
+
+        <button class="primary-button" onclick="productGebruiken()">
+            Gebruik uit voorraad
+        </button>
+
+    </div>
+
+    <div id="gebruikStatus"></div>
+
+</div>
+    
 
 <!-- QR GENERATOR -->
 
@@ -558,7 +631,52 @@ function showScreen(id) {
 
 function goHome() {
     showScreen("homeScreen");
+}async function openGebruiken() {
+
+    showScreen("gebruikenScreen");
+
+    const doosSelect =
+        document.getElementById("gebruikDoosnummer");
+
+    const productSelect =
+        document.getElementById("gebruikProduct");
+
+    doosSelect.innerHTML =
+        '<option value="">Kies een doos...</option>';
+
+    productSelect.innerHTML =
+        '<option value="">Kies eerst een doos...</option>';
+
+    const { data: dozen, error } = await voorraadDb
+        .from("dozen")
+        .select("*")
+        .order("doosnummer", { ascending: true });
+
+    if (error) {
+        alert(
+            "De dozen konden niet worden geladen:\n\n" +
+            error.message
+        );
+        return;
+    }
+
+    dozen.forEach(doos => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = doos.doosnummer;
+        option.textContent =
+            doos.doosnummer + " - " + (doos.locatie || "");
+
+        doosSelect.appendChild(option);
+    });
+
+    doosSelect.onchange = laadProductenVoorGebruik;
 }
+
+
+   
 async function openVoorraad() {
 
     showScreen("screen-voorraad");
