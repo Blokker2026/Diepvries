@@ -686,7 +686,74 @@ async function openVoorraad() {
 }
 }
 
-/* NIEUWE DOOS */
+    async function openDoos(doosnummer) {
+
+    const { data: doos, error: doosError } = await voorraadDb
+        .from("dozen")
+        .select("*")
+        .eq("doosnummer", doosnummer)
+        .single();
+
+    if (doosError) {
+        alert(
+            "De doos kon niet worden geopend:\n\n" +
+            doosError.message
+        );
+        console.log(doosError);
+        return;
+    }
+
+    const { data: producten, error: productError } = await voorraadDb
+        .from("Producten")
+        .select("*")
+        .eq("doosnummer", doosnummer);
+
+    if (productError) {
+        alert(
+            "De producten konden niet worden geladen:\n\n" +
+            productError.message
+        );
+        console.log(productError);
+        return;
+    }
+
+    document.getElementById("boxId").value =
+        doos.doosnummer;
+
+    document.getElementById("location").value =
+        doos.locatie || "Vriezer 1 - lade 1";
+
+    document.getElementById("boxNote").value =
+        doos.notitie || "";
+
+    document.getElementById("products").innerHTML = "";
+
+    productCounter = 0;
+
+    if (producten && producten.length > 0) {
+
+        producten.forEach(product => {
+
+            addProduct({
+                name: product.Naam || "",
+                portions: product.porties || "",
+                weight: product.gewicht || "",
+                freeze: product.invriesdatum || "",
+                expiry: product.houdbaar_tot || "",
+                note: product.notitie || ""
+            });
+
+        });
+
+    } else {
+
+        addProduct();
+
+    }
+
+    showScreen("boxScreen");
+}
+/* Open bestaande doos vanuit voorraad  NIEUWE DOOS */
 
 function openNewBox() {
 
