@@ -1710,7 +1710,8 @@ if(!locatie){
     houdbaar_tot: c.querySelector(".opnieuw-expiry").value || null,
     notitie: c.querySelector(".opnieuw-note").value.trim()
 });
-
+    }
+    
     const {error}=await voorraadDb.from("Producten").insert(producten);
     if(error){alert("De producten konden niet worden opgeslagen:\n\n"+error.message);return;}
 
