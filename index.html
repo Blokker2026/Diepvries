@@ -641,7 +641,7 @@ textarea {
 <div id="opnieuwVullenScreen" class="screen">
     <button class="back-button" onclick="goHome()">← Terug</button>
     <h2 class="title">♻️ Opnieuw vullen</h2>
-    <div class="help">Kies een bestaande lege doos. De locatie en het kenmerk van de doos blijven ongewijzigd.</div>
+   <div class="help">Kies een bestaande lege doos en geef aan waar je hem opnieuw in de vriezer plaatst.</div>
     <div class="card">
         <label>Doosnummer</label>
         <select id="opnieuwDoosnummer"><option value="">Kies een lege doos...</option></select>
@@ -1628,7 +1628,7 @@ async function openOpnieuwVullen() {
     (dozen||[]).filter(d=>!bezet.has(d.doosnummer)).forEach(d=>{
         const o=document.createElement("option");
         o.value=d.doosnummer;
-        o.textContent=d.doosnummer+" - "+(d.locatie||"Geen locatie");
+       o.textContent=d.doosnummer;
         o.dataset.locatie=d.locatie||"";
         o.dataset.notitie=d.notitie||"";
         s.appendChild(o);
