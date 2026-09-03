@@ -2006,11 +2006,17 @@ async function openVoorraad() {
         .select("*")
         .eq("doosnummer", doos.doosnummer);
 
-    if (productError) {
-        console.log("Fout bij laden producten:", productError);
-    }
+   if (productError) {
+    console.log("Fout bij laden producten:", productError);
+    continue;
+}
 
-    if (producten && producten.length > 0) {
+// Lege dozen niet tonen in Voorraad
+if (!producten || producten.length === 0) {
+    continue;
+}
+
+if (producten && producten.length > 0) {
 
         const productBlok =
             document.createElement("div");
