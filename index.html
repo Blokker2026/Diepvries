@@ -1650,6 +1650,18 @@ function addOpnieuwProduct(){
     c.innerHTML=`
       <button type="button" class="remove-product" onclick="removeOpnieuwProduct(this)">×</button>
       <label>Productnaam</label><input class="opnieuw-name" type="text" placeholder="Bijvoorbeeld: soep">
+      <label>Dierlijk ingrediënt / soort</label>
+<select class="opnieuw-animal">
+    <option value="">Kies een soort...</option>
+    <option value="Kip">Kip</option>
+    <option value="Rundvlees">Rundvlees</option>
+    <option value="Rundergehakt">Rundergehakt</option>
+    <option value="Varkensvlees">Varkensvlees</option>
+    <option value="Vis">Vis</option>
+    <option value="Vegetarisch">Vegetarisch</option>
+    <option value="Anders">Anders</option>
+    <option value="Niet van toepassing">Niet van toepassing</option>
+</select>
       <div class="row"><div><label>Aantal porties (optioneel)</label><input class="opnieuw-portions" type="number" min="0"></div>
       <div><label>Gewicht in gram (optioneel)</label><input class="opnieuw-weight" type="number" min="0"></div></div>
       <div class="row"><div><label>Invriesdatum</label><input class="opnieuw-freeze" type="date"></div>
@@ -1682,18 +1694,22 @@ if(!locatie){
     const producten=[];
     for(const c of document.querySelectorAll("#opnieuwProductList .product-card")){
         const naam=c.querySelector(".opnieuw-name").value.trim();
+        const dierlijkIngredient =
+    c.querySelector(".opnieuw-animal").value;
         const pv=c.querySelector(".opnieuw-portions").value;
         const gw=c.querySelector(".opnieuw-weight").value;
         if(!naam){alert("Vul bij ieder product een productnaam in.");return;}
         if(pv===""&&gw===""){alert("Vul bij ieder product minimaal het aantal porties of het gewicht in.");return;}
         producten.push({
-            doosnummer:boxId, Naam:naam,
-            porties:pv===""?null:Number(pv), gewicht:gw===""?null:Number(gw),
-            invriesdatum:c.querySelector(".opnieuw-freeze").value||null,
-            houdbaar_tot:c.querySelector(".opnieuw-expiry").value||null,
-            notitie:c.querySelector(".opnieuw-note").value.trim()
-        });
-    }
+    doosnummer: boxId,
+    Naam: naam,
+    dierlijk_ingredient: dierlijkIngredient || null,
+    porties: pv === "" ? null : Number(pv),
+    gewicht: gw === "" ? null : Number(gw),
+    invriesdatum: c.querySelector(".opnieuw-freeze").value || null,
+    houdbaar_tot: c.querySelector(".opnieuw-expiry").value || null,
+    notitie: c.querySelector(".opnieuw-note").value.trim()
+});
 
     const {error}=await voorraadDb.from("Producten").insert(producten);
     if(error){alert("De producten konden niet worden opgeslagen:\n\n"+error.message);return;}
@@ -2418,6 +2434,7 @@ async function openVoorraad() {
 
             addProduct({
                 name: product.Naam || "",
+                animal: product.dierlijk_ingredient || "",
                 portions: product.porties || "",
                 weight: product.gewicht || "",
                 freeze: product.invriesdatum || "",
@@ -2480,7 +2497,20 @@ function addProduct(data = {}) {
         </div>
 
         <label>Soort / product</label>
-
+        
+    <label>Dierlijk ingrediënt / soort</label>
+    <select class="product-animal">
+    <option value="">Kies een soort...</option>
+    <option value="Kip" ${data.animal === "Kip" ? "selected" : ""}>Kip</option>
+    <option value="Rundvlees" ${data.animal === "Rundvlees" ? "selected" : ""}>Rundvlees</option>
+    <option value="Rundergehakt" ${data.animal === "Rundergehakt" ? "selected" : ""}>Rundergehakt</option>
+    <option value="Varkensvlees" ${data.animal === "Varkensvlees" ? "selected" : ""}>Varkensvlees</option>
+    <option value="Vis" ${data.animal === "Vis" ? "selected" : ""}>Vis</option>
+    <option value="Vegetarisch" ${data.animal === "Vegetarisch" ? "selected" : ""}>Vegetarisch</option>
+    <option value="Anders" ${data.animal === "Anders" ? "selected" : ""}>Anders</option>
+    <option value="Niet van toepassing" ${data.animal === "Niet van toepassing" ? "selected" : ""}>Niet van toepassing</option>
+    </select>
+    
         <input
         class="product-name"
         placeholder="Bijvoorbeeld erwtensoep"
@@ -2630,7 +2660,10 @@ if (bestaandeNieuweDoos) {
 
         const naam =
             card.querySelector(".product-name").value.trim();
-
+       
+    const dierlijkIngredient =
+    card.querySelector(".product-animal").value;
+        
         const porties =
             card.querySelector(".product-portions").value;
 
@@ -2695,6 +2728,7 @@ if (bestaandeNieuweDoos) {
         producten.push({
             doosnummer: boxId,
             Naam: naam,
+            dierlijk_ingredient: dierlijkIngredient || null,
             porties: portiesGetal,
             gewicht: gewichtGetal,
             invriesdatum: invriesdatum || null,
