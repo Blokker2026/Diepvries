@@ -832,30 +832,32 @@ function goHome() {
     status.classList.remove("visible");
     status.innerHTML = "";
 
-    const { data: dozen, error } = await voorraadDb
-        .from("dozen")
-        .select("doosnummer, locatie")
-        .order("doosnummer", { ascending: true });
+   const { data: producten, error } = await voorraadDb
+    .from("Producten")
+    .select("doosnummer");
 
-    if (error) {
-        alert(
-            "De dozen konden niet worden geladen:\n\n" +
-            error.message
-        );
-        return;
-    }
+if (error) {
+    alert(
+        "De dozen konden niet worden geladen:\n\n" +
+        error.message
+    );
+    return;
+}
 
-    (dozen || []).forEach(doos => {
+const doosnummersMetVoorraad =
+    [...new Set((producten || []).map(p => p.doosnummer))]
+    .sort();
 
-        const option =
-            document.createElement("option");
+doosnummersMetVoorraad.forEach(doosnummer => {
 
-        option.value = doos.doosnummer;
-        option.textContent =
-            doos.doosnummer + " - " + (doos.locatie || "Geen locatie");
+    const option =
+        document.createElement("option");
 
-        doosSelect.appendChild(option);
-    });
+    option.value = doosnummer;
+    option.textContent = doosnummer;
+
+    doosSelect.appendChild(option);
+});
 
     doosSelect.onchange = laadProductenVoorGebruik;
 }
