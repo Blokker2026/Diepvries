@@ -1904,7 +1904,7 @@ async function maakDoosLeeg() {
     const bevestigd = confirm(
         "Weet je zeker dat je " + doosnummer + " volledig wilt leegmaken?\n\n" +
         "Alle " + producten.length + " product(en) in deze doos worden verwijderd.\n\n" +
-        "De doos zelf, locatie en het kenmerk van de doos blijven bewaard."
+        "De doos zelf en het kenmerk van de doos blijven bewaard."
     );
 
     if (!bevestigd) {
@@ -1934,7 +1934,21 @@ async function maakDoosLeeg() {
         await laadDoosVoorLeegmaken();
         return;
     }
+const { error: locatieFout } = await voorraadDb
+    .from("dozen")
+    .update({
+        locatie: "",
+        updated_at: new Date().toISOString()
+    })
+    .eq("doosnummer", doosnummer);
 
+if (locatieFout) {
+    alert(
+        "De locatie van de lege doos kon niet worden gewist:\n\n" +
+        locatieFout.message
+    );
+    return;
+}
     const status =
         document.getElementById("doosLeegStatus");
 
