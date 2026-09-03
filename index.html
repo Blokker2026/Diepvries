@@ -2498,7 +2498,13 @@ function addProduct(data = {}) {
         </div>
 
         <label>Soort / product</label>
-        
+   
+    
+        <input
+        class="product-name"
+        placeholder="Bijvoorbeeld erwtensoep"
+        value="${data.name || ""}">
+     
     <label>Dierlijk ingrediënt / soort</label>
     <select class="product-animal">
     <option value="">Kies een soort...</option>
@@ -2512,11 +2518,6 @@ function addProduct(data = {}) {
     <option value="Niet van toepassing" ${data.animal === "Niet van toepassing" ? "selected" : ""}>Niet van toepassing</option>
     </select>
     
-        <input
-        class="product-name"
-        placeholder="Bijvoorbeeld erwtensoep"
-        value="${data.name || ""}">
-
         <div class="row">
 
             <div>
