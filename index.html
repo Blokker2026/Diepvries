@@ -345,21 +345,77 @@ textarea {
 
     <div class="section-title">Voorraad beheren</div>
 
-  <button class="main-button" onclick="openVoorraad()">
-        <div class="icon">📦</div>
-        <div>
-            <div class="button-title">Voorraad</div>
-            <div class="button-description">
-                Bekijk alle dozen en producten
-            </div>
+<button class="main-button" onclick="openVoorraad()">
+    <div class="icon">📦</div>
+    <div>
+        <div class="button-title">Voorraad</div>
+        <div class="button-description">
+            Bekijk alle dozen en producten
         </div>
-    </button>
-    <button class="main-button" onclick="openBijnaVerlopen()">
+    </div>
+</button>
+
+<button class="main-button" onclick="openOpnieuwVullen()">
+    <div class="icon">♻️</div>
+    <div>
+        <div class="button-title">Opnieuw vullen</div>
+        <div class="button-description">
+            Vul een bestaande lege doos opnieuw
+        </div>
+    </div>
+</button>
+
+<button class="main-button" onclick="openBijnaVerlopen()">
     <div class="icon">⏰</div>
     <div>
         <div class="button-title">Bijna verlopen</div>
         <div class="button-description">
             Producten die binnen 15 dagen verlopen
+        </div>
+    </div>
+</button>
+
+<button class="main-button" onclick="openGebruiken()">
+    <div class="icon">🍽️</div>
+    <div>
+        <div class="button-title">Gebruiken</div>
+        <div class="button-description">
+            Haal een deel van een product uit de voorraad
+        </div>
+    </div>
+</button>
+
+<button class="main-button" onclick="openDoosLeeg()">
+    <div class="icon">🗑️</div>
+    <div>
+        <div class="button-title">Doos leeg</div>
+        <div class="button-description">
+            Verwijder alle producten uit een doos
+        </div>
+    </div>
+</button>
+
+<div style="
+    border-top: 2px dashed #c7d2d5;
+    margin: 24px 4px 18px;
+"></div>
+
+<button class="main-button" onclick="openNewBox()">
+    <div class="icon">➕</div>
+    <div>
+        <div class="button-title">Nieuwe doos</div>
+        <div class="button-description">
+            Vul een nieuwe voorraadbox
+        </div>
+    </div>
+</button>
+
+<button class="main-button" onclick="openGenerator()">
+    <div class="icon">▦</div>
+    <div>
+        <div class="button-title">QR-codes</div>
+        <div class="button-description">
+            Maak en print QR-codes
         </div>
     </div>
 </button>
