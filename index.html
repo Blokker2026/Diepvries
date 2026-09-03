@@ -820,7 +820,149 @@ function goHome() {
 
     document.getElementById("zoekProduct").focus();
 }   
-       
+      async function zoekProducten() {
+
+    const zoekterm =
+        document.getElementById("zoekProduct").value
+            .trim()
+            .toLowerCase();
+
+    const resultaten =
+        document.getElementById("zoekResultaten");
+
+    resultaten.innerHTML = "";
+
+    if (!zoekterm) {
+        return;
+    }
+
+    const { data: producten, error: productFout } = await voorraadDb
+        .from("Producten")
+        .select("id, doosnummer, Naam, dierlijk_ingredient, porties, gewicht, houdbaar_tot");
+
+    if (productFout) {
+        resultaten.innerHTML = `
+            <div class="card">
+                De producten konden niet worden geladen.
+            </div>
+        `;
+        console.log(productFout);
+        return;
+    }
+
+    const { data: dozen, error: doosFout } = await voorraadDb
+        .from("dozen")
+        .select("doosnummer, locatie");
+
+    if (doosFout) {
+        resultaten.innerHTML = `
+            <div class="card">
+                De locaties konden niet worden geladen.
+            </div>
+        `;
+        console.log(doosFout);
+        return;
+    }
+
+    const locatiePerDoos = {};
+
+    (dozen || []).forEach(doos => {
+        locatiePerDoos[doos.doosnummer] =
+            doos.locatie || "Geen locatie";
+    });
+
+    const gevonden = (producten || []).filter(product => {
+
+        const naam =
+            (product.Naam || "").toLowerCase();
+
+        const soort =
+            (product.dierlijk_ingredient || "").toLowerCase();
+
+        return (
+            naam.includes(zoekterm) ||
+            soort.includes(zoekterm)
+        );
+    });
+
+    if (gevonden.length === 0) {
+        resultaten.innerHTML = `
+            <div class="card">
+                Geen producten gevonden voor
+                <strong>${escapeHtml(zoekterm)}</strong>.
+            </div>
+        `;
+        return;
+    }
+
+    gevonden.forEach(product => {
+
+        const kaart =
+            document.createElement("div");
+
+        kaart.className = "card";
+        kaart.style.cursor = "pointer";
+
+        kaart.onclick = () =>
+            openDoos(product.doosnummer);
+
+        const portiesTekst =
+            product.porties === null
+                ? "niet bijgehouden"
+                : product.porties;
+
+        const gewichtTekst =
+            product.gewicht === null
+                ? "niet bijgehouden"
+                : product.gewicht + " gram";
+
+        kaart.innerHTML = `
+            <div style="
+                font-size:18px;
+                font-weight:700;
+                margin-bottom:8px;
+            ">
+                🥩 ${escapeHtml(product.Naam || "Product")}
+            </div>
+
+            <div style="margin-bottom:4px;">
+                📦 ${escapeHtml(product.doosnummer || "-")}
+            </div>
+
+            <div style="margin-bottom:4px;">
+                📍 ${escapeHtml(locatiePerDoos[product.doosnummer] || "Geen locatie")}
+            </div>
+
+            ${
+                product.dierlijk_ingredient
+                    ? `
+                    <div style="margin-bottom:4px;">
+                        Soort:
+                        ${escapeHtml(product.dierlijk_ingredient)}
+                    </div>
+                    `
+                    : ""
+            }
+
+            <div style="margin-bottom:4px;">
+                Porties:
+                ${escapeHtml(String(portiesTekst))}
+            </div>
+
+            <div style="margin-bottom:4px;">
+                Gewicht:
+                ${escapeHtml(String(gewichtTekst))}
+            </div>
+
+            <div>
+                Houdbaar tot:
+                ${escapeHtml(product.houdbaar_tot || "-")}
+            </div>
+        `;
+
+        resultaten.appendChild(kaart);
+    });
+} 
     async function openGebruiken() {
 
     showScreen("gebruikenScreen");
