@@ -363,6 +363,15 @@ textarea {
         </div>
     </div>
 </button>
+    <button class="main-button" onclick="openDoosWijzigen()">
+    <div class="icon">✏️</div>
+    <div>
+        <div class="button-title">Doos wijzigen</div>
+        <div class="button-description">
+            Corrigeer of vul gegevens van een bestaande doos aan
+        </div>
+    </div>
+</button>
 <button class="main-button" onclick="openOpnieuwVullen()">
     <div class="icon">♻️</div>
     <div>
@@ -501,6 +510,39 @@ font-weight: 700;
     </div>
 
     <div id="zoekResultaten"></div>
+
+</div>
+    <!-- ============================= -->
+<!-- SCHERM: DOOS WIJZIGEN -->
+<!-- ============================= -->
+
+<div id="doosWijzigenScreen" class="screen">
+
+    <button class="back-button" onclick="goHome()">
+        ← Terug
+    </button>
+
+    <h2 class="title">✏️ Doos wijzigen</h2>
+
+    <div class="help">
+        Kies een bestaande doos waarvan je gegevens wilt corrigeren of aanvullen.
+    </div>
+
+    <div class="card">
+
+        <label for="wijzigDoosKeuze">Kies een doos</label>
+
+        <select id="wijzigDoosKeuze">
+            <option value="">Kies een doos...</option>
+        </select>
+
+        <button
+            class="primary-button"
+            onclick="openGekozenDoosVoorWijzigen()">
+            ✏️ DOOS OPENEN
+        </button>
+
+    </div>
 
 </div>
 <!-- NIEUWE DOOS -->
@@ -963,6 +1005,57 @@ function goHome() {
         resultaten.appendChild(kaart);
     });
 } 
+    function openGekozenDoosVoorWijzigen() {
+
+    const doosnummer =
+        document.getElementById("wijzigDoosKeuze").value;
+
+    if (!doosnummer) {
+        alert("Kies eerst een doos.");
+        return;
+    }
+
+    openDoos(doosnummer);
+}
+    async function openDoosWijzigen() {
+
+    showScreen("doosWijzigenScreen");
+
+    const select =
+        document.getElementById("wijzigDoosKeuze");
+
+    select.innerHTML =
+        '<option value="">Kies een doos...</option>';
+
+    const { data: dozen, error } = await voorraadDb
+        .from("dozen")
+        .select("doosnummer, locatie")
+        .order("doosnummer", { ascending: true });
+
+    if (error) {
+        alert(
+            "De dozen konden niet worden geladen:\n\n" +
+            error.message
+        );
+        return;
+    }
+
+    (dozen || []).forEach(doos => {
+
+        const option =
+            document.createElement("option");
+
+        option.value =
+            doos.doosnummer;
+
+        option.textContent =
+            doos.doosnummer +
+            " - " +
+            (doos.locatie || "Geen locatie");
+
+        select.appendChild(option);
+    });
+}
     async function openGebruiken() {
 
     showScreen("gebruikenScreen");
