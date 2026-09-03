@@ -459,15 +459,18 @@ textarea {
         <label>Doosnummer</label>
         <input id="boxId" value="DOOS-0001">
 
-        <label>Locatie</label>
-        <select id="location">
-            <option>Vriezer 1 - lade 1</option>
-            <option>Vriezer 1 - lade 2</option>
-            <option>Vriezer 1 - lade 3</option>
-            <option>Vriezer 2 - lade 1</option>
-            <option>Vriezer 2 - lade 2</option>
-            <option>Vriezer 2 - lade 3</option>
-        </select>
+     <label>Locatie in vriezer</label>
+<select id="location">
+    <option value="">Kies een locatie...</option>
+    <option>Klep</option>
+    <option>Lade 1</option>
+    <option>Lade 2</option>
+    <option>Lade 3</option>
+    <option>Lade 4</option>
+    <option>Lade 5</option>
+    <option>Lade 6</option>
+    <option>Lade 7</option>
+</select>
 
     </div>
 
@@ -2078,8 +2081,8 @@ async function openVoorraad() {
     document.getElementById("boxId").value =
         doos.doosnummer;
 
-    document.getElementById("location").value =
-        doos.locatie || "Vriezer 1 - lade 1";
+  document.getElementById("location").value =
+    doos.locatie || "";
 
     document.getElementById("boxNote").value =
         doos.notitie || "";
@@ -2480,8 +2483,8 @@ function loadBox(boxId) {
         JSON.parse(saved);
 
 
-    document.getElementById("location").value =
-        box.location || "Vriezer 1 - lade 1";
+  document.getElementById("location").value =
+    box.location || "";
 
     document.getElementById("boxNote").value =
         box.note || "";
