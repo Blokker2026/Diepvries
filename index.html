@@ -354,6 +354,15 @@ textarea {
             </div>
         </div>
     </button>
+    <button class="main-button" onclick="openBijnaVerlopen()">
+    <div class="icon">⏰</div>
+    <div>
+        <div class="button-title">Bijna verlopen</div>
+        <div class="button-description">
+            Producten die binnen 15 dagen verlopen
+        </div>
+    </div>
+</button>
 
     <button class="main-button" onclick="openNewBox()">
         <div class="icon">➕</div>
@@ -365,16 +374,7 @@ textarea {
         </div>
     </button>
 
-    <button class="main-button" onclick="openGenerator()">
-        <div class="icon">▦</div>
-        <div>
-            <div class="button-title">QR-codes</div>
-            <div class="button-description">
-                Maak en print QR-codes
-            </div>
-        </div>
-    </button>
-    <button class="main-button" onclick="openGebruiken()">
+       <button class="main-button" onclick="openGebruiken()">
     <div class="icon">🍽️</div>
     <div>
         <div class="button-title">Gebruiken</div>
@@ -400,6 +400,16 @@ textarea {
             <div class="button-description">Vul een bestaande lege doos opnieuw</div>
         </div>
     </button>
+
+    <button class="main-button" onclick="openGenerator()">
+    <div class="icon">▦</div>
+    <div>
+        <div class="button-title">QR-codes</div>
+        <div class="button-description">
+            Maak en print QR-codes
+        </div>
+    </div>
+</button>
 
   
 <!-- gewone knoppen van Voorraad hierboven -->
@@ -655,7 +665,29 @@ textarea {
     <div id="opnieuwStatus" class="status"></div>
 </div>
 
+<!-- ============================ -->
+<!-- SCHERM: BIJNA VERLOPEN -->
+<!-- ============================ -->
 
+<div id="bijnaVerlopenScreen" class="screen">
+
+    <button class="back-button" onclick="goHome()">
+        ← Terug
+    </button>
+
+    <h2 class="title">⏰ Bijna verlopen</h2>
+
+    <div class="help">
+        Producten die binnen 15 dagen verlopen.
+    </div>
+
+    <div id="bijnaVerlopenLoading" class="card">
+        Houdbaarheidsdatums worden gecontroleerd...
+    </div>
+
+    <div id="bijnaVerlopenLijst"></div>
+
+</div>
 
 <!-- QR GENERATOR -->
 
@@ -1905,7 +1937,182 @@ function escapeHtml(tekst) {
         .replaceAll("'", "&#039;");
 }
 
+async function openBijnaVerlopen() {
 
+    showScreen("bijnaVerlopenScreen");
+
+    const loading =
+        document.getElementById("bijnaVerlopenLoading");
+
+    const lijst =
+        document.getElementById("bijnaVerlopenLijst");
+
+    loading.style.display = "block";
+    loading.innerHTML =
+        "Houdbaarheidsdatums worden gecontroleerd...";
+
+    lijst.innerHTML = "";
+
+    const { data: producten, error } = await voorraadDb
+        .from("Producten")
+        .select("id, doosnummer, Naam, houdbaar_tot")
+        .not("houdbaar_tot", "is", null)
+        .order("houdbaar_tot", { ascending: true });
+
+    if (error) {
+
+        loading.innerHTML =
+            "De houdbaarheidsdatums konden niet worden geladen.";
+
+        console.log(error);
+        return;
+    }
+
+    const vandaag = new Date();
+    vandaag.setHours(0, 0, 0, 0);
+
+    const bijnaVerlopen = [];
+
+    (producten || []).forEach(product => {
+
+        if (!product.houdbaar_tot) {
+            return;
+        }
+
+        const delen =
+            product.houdbaar_tot.split("-");
+
+        const houdbaarDatum =
+            new Date(
+                Number(delen[0]),
+                Number(delen[1]) - 1,
+                Number(delen[2])
+            );
+
+        houdbaarDatum.setHours(0, 0, 0, 0);
+
+        const verschil =
+            houdbaarDatum.getTime() -
+            vandaag.getTime();
+
+        const dagen =
+            Math.round(
+                verschil / (1000 * 60 * 60 * 24)
+            );
+
+     if (dagen <= 15) {
+
+    bijnaVerlopen.push({
+        ...product,
+        dagen: dagen
+    });
+}
+    });
+
+    loading.style.display = "none";
+
+    if (bijnaVerlopen.length === 0) {
+
+        lijst.innerHTML = `
+            <div class="card">
+                ✅ <strong>Alles is in orde.</strong>
+                <br><br>
+                Er zijn geen producten die binnen
+                15 dagen verlopen.
+            </div>
+        `;
+
+        return;
+    }
+
+    bijnaVerlopen.forEach(product => {
+
+        const kaart =
+            document.createElement("div");
+
+        kaart.className = "card";
+
+        let dagenTekst = "";
+
+      if (product.dagen < 0) {
+
+    const dagenVerlopen =
+        Math.abs(product.dagen);
+
+    if (dagenVerlopen === 1) {
+        dagenTekst =
+            "🔴 Sinds gisteren verlopen";
+    } else {
+        dagenTekst =
+            "🔴 " +
+            dagenVerlopen +
+            " dagen verlopen";
+    }
+
+} else if (product.dagen === 0) {
+
+    dagenTekst =
+        "⚠️ Verloopt vandaag";
+
+} else if (product.dagen === 1) {
+
+    dagenTekst =
+        "⚠️ Verloopt morgen";
+
+} else {
+
+    dagenTekst =
+        "⚠️ Verloopt over " +
+        product.dagen +
+        " dagen";
+}
+
+        const datumDelen =
+            product.houdbaar_tot.split("-");
+
+        const datumTekst =
+            datumDelen[2] +
+            "-" +
+            datumDelen[1] +
+            "-" +
+            datumDelen[0];
+
+        kaart.innerHTML = `
+            <div style="
+                font-size:18px;
+                font-weight:700;
+                margin-bottom:10px;
+            ">
+                📦 ${escapeHtml(product.doosnummer)}
+            </div>
+
+            <div style="
+                font-size:17px;
+                font-weight:700;
+                margin-bottom:8px;
+            ">
+                ${escapeHtml(product.Naam || "Product")}
+            </div>
+
+            <div style="
+                font-weight:700;
+                margin-bottom:6px;
+            ">
+                ${escapeHtml(dagenTekst)}
+            </div>
+
+            <div style="
+                color:#718187;
+                font-size:14px;
+            ">
+                Houdbaar tot:
+                ${escapeHtml(datumTekst)}
+            </div>
+        `;
+
+        lijst.appendChild(kaart);
+    });
+}
 async function openVoorraad() {
 
     showScreen("screen-voorraad");
