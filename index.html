@@ -1649,9 +1649,26 @@ function laadLegeDoosVoorOpnieuwVullen(){
     const lijst=document.getElementById("opnieuwProductList");
     if(!s.value){info.style.display="none";gebied.style.display="none";lijst.innerHTML="";return;}
     const o=s.options[s.selectedIndex];
-    info.innerHTML="<strong>📦 "+escapeHtml(s.value)+"</strong><br>📍 "+
-        escapeHtml(o.dataset.locatie||"Geen locatie")+"<br>Kenmerk doos: "+
-        escapeHtml(o.dataset.notitie||"-");
+    info.innerHTML=`
+    <strong>📦 ${escapeHtml(s.value)}</strong><br><br>
+
+    <label>Nieuwe locatie</label>
+    <select id="opnieuwLocatie">
+        <option value="">Kies een locatie...</option>
+        <option>Klep</option>
+        <option>Lade 1</option>
+        <option>Lade 2</option>
+        <option>Lade 3</option>
+        <option>Lade 4</option>
+        <option>Lade 5</option>
+        <option>Lade 6</option>
+        <option>Lade 7</option>
+    </select>
+
+    <div style="margin-top:14px;">
+        Kenmerk doos: ${escapeHtml(o.dataset.notitie||"-")}
+    </div>
+`;
     info.style.display="block"; gebied.style.display="block"; lijst.innerHTML="";
     addOpnieuwProduct();
 }
@@ -1680,6 +1697,12 @@ function removeOpnieuwProduct(b){
 async function saveOpnieuwVullen(){
     const boxId=document.getElementById("opnieuwDoosnummer").value;
     if(!boxId){alert("Kies eerst een lege doos.");return;}
+    const locatie=document.getElementById("opnieuwLocatie").value;
+
+if(!locatie){
+    alert("Kies eerst een nieuwe locatie in de vriezer.");
+    return;
+}
 
     const {data:bestaand,error:ce}=await voorraadDb.from("Producten").select("id").eq("doosnummer",boxId).limit(1);
     if(ce){alert("De doos kon niet worden gecontroleerd:\n\n"+ce.message);return;}
@@ -1704,9 +1727,24 @@ async function saveOpnieuwVullen(){
     const {error}=await voorraadDb.from("Producten").insert(producten);
     if(error){alert("De producten konden niet worden opgeslagen:\n\n"+error.message);return;}
 
+    const { error: locatieFout } = await voorraadDb
+    .from("dozen")
+    .update({
+        locatie: locatie,
+        updated_at: new Date().toISOString()
+    })
+    .eq("doosnummer", boxId);
+
+if (locatieFout) {
+    alert(
+        "De nieuwe locatie kon niet worden opgeslagen:\n\n" +
+        locatieFout.message
+    );
+    return;
+}
     const st=document.getElementById("opnieuwStatus");
     st.innerHTML="✅ DOOS OPNIEUW GEVULD<br><br>"+escapeHtml(boxId)+"<br>"+
-        producten.length+" product(en) toegevoegd.<br>Locatie en kenmerk van de doos zijn ongewijzigd.";
+       producten.length+" product(en) toegevoegd.<br>Nieuwe locatie: "+escapeHtml(locatie)+".";
     st.classList.add("visible");
     document.getElementById("opnieuwProductGebied").style.display="none";
 }
