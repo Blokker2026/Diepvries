@@ -2352,7 +2352,16 @@ async function openVoorraad() {
                         🥩 ${escapeHtml(product.Naam || "Product")}
                     </strong>
                     <br>
-
+                    ${
+                    product.dierlijk_ingredient
+                    ? `
+                    Soort:
+                    ${escapeHtml(product.dierlijk_ingredient)}
+                        <br>
+                        `
+                        : ""
+                    }
+                    
                     Porties:
                     ${escapeHtml(String(portiesTekst))}
                     <br>
