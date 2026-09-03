@@ -1919,114 +1919,227 @@ async function openVoorraad() {
         document.getElementById("voorraad-lijst");
 
     loading.style.display = "block";
+    loading.innerHTML = "Voorraad wordt geladen...";
+
     lijst.innerHTML = "";
 
-    const { data: dozen, error } = await voorraadDb
+    const { data: dozen, error: dozenFout } = await voorraadDb
         .from("dozen")
         .select("*")
         .order("doosnummer", { ascending: true });
 
-    if (error) {
-
+    if (dozenFout) {
         loading.innerHTML =
             "Er ging iets mis bij het laden van de voorraad.";
 
-        console.log(error);
+        console.log(dozenFout);
+        return;
+    }
+
+    const { data: producten, error: productenFout } = await voorraadDb
+        .from("Producten")
+        .select("*");
+
+    if (productenFout) {
+        loading.innerHTML =
+            "Er ging iets mis bij het laden van de producten.";
+
+        console.log(productenFout);
         return;
     }
 
     loading.style.display = "none";
 
-    if (!dozen || dozen.length === 0) {
+    const productenPerDoos = {};
+
+    (producten || []).forEach(product => {
+
+        if (!productenPerDoos[product.doosnummer]) {
+            productenPerDoos[product.doosnummer] = [];
+        }
+
+        productenPerDoos[product.doosnummer].push(product);
+    });
+
+    const gevuldeDozen =
+        (dozen || []).filter(doos =>
+            productenPerDoos[doos.doosnummer] &&
+            productenPerDoos[doos.doosnummer].length > 0
+        );
+
+    if (gevuldeDozen.length === 0) {
 
         lijst.innerHTML = `
             <div class="card">
-                <strong>Nog geen dozen gevonden.</strong>
+                <strong>De vriezer is leeg.</strong>
                 <br><br>
-                Voeg eerst een nieuwe doos toe.
+                Voeg een nieuwe doos toe of vul een lege doos opnieuw.
             </div>
         `;
 
         return;
     }
 
-    for (const doos of dozen) {
+    const locaties = [
+        "Klep",
+        "Lade 1",
+        "Lade 2",
+        "Lade 3",
+        "Lade 4",
+        "Lade 5",
+        "Lade 6",
+        "Lade 7"
+    ];
 
-    const kaart =
-        document.createElement("div");
+    const heeftGeenLocatie =
+        gevuldeDozen.some(doos => !doos.locatie);
 
-    kaart.className = "card";
-        kaart.style.cursor = "pointer";
-        kaart.onclick = () => openDoos(doos.doosnummer);
-        
-    kaart.innerHTML = `
-        <div style="font-size:20px;font-weight:700;margin-bottom:8px;">
-            📦 ${doos.doosnummer || "Onbekende doos"}
-        </div>
-
-        <div style="margin-bottom:6px;">
-            📍 ${doos.locatie || "Geen locatie"}
-        </div>
-
-        <div style="margin-bottom:6px;">
-            Status: ${doos.status || "actief"}
-        </div>
-
-        <div style="color:#718187;font-size:14px;margin-bottom:12px;">
-            ${doos.notitie || ""}
-        </div>
-    `;
-
-    const { data: producten, error: productError } = await voorraadDb
-        .from("Producten")
-        .select("*")
-        .eq("doosnummer", doos.doosnummer);
-
-   if (productError) {
-    console.log("Fout bij laden producten:", productError);
-    continue;
-}
-
-// Lege dozen niet tonen in Voorraad
-if (!producten || producten.length === 0) {
-    continue;
-}
-
-if (producten && producten.length > 0) {
-
-        const productBlok =
-            document.createElement("div");
-
-        productBlok.style.marginTop = "14px";
-        productBlok.style.paddingTop = "12px";
-        productBlok.style.borderTop = "1px solid #e0e7e8";
-
-        producten.forEach(product => {
-
-            const productRegel =
-                document.createElement("div");
-
-            productRegel.style.marginBottom = "12px";
-
-            productRegel.innerHTML = `
-                <strong>🥩 ${product.Naam || "Product"}</strong><br>
-                Porties: ${product.porties === null ? "niet bijgehouden" : product.porties}<br>
-                Gewicht: ${product.gewicht === null ? "niet bijgehouden" : product.gewicht + " gram"}<br>
-                Ingevroren: ${product.invriesdatum || "-"}<br>
-                Houdbaar tot: ${product.houdbaar_tot || "-"}
-                ${product.notitie
-                    ? `<br>📝 ${product.notitie}`
-                    : ""}
-            `;
-
-            productBlok.appendChild(productRegel);
-        });
-
-        kaart.appendChild(productBlok);
+    if (heeftGeenLocatie) {
+        locaties.push("Geen locatie");
     }
 
-    lijst.appendChild(kaart);
-}
+    locaties.forEach(locatie => {
+
+        const dozenOpLocatie =
+            gevuldeDozen
+                .filter(doos => {
+                    if (locatie === "Geen locatie") {
+                        return !doos.locatie;
+                    }
+
+                    return doos.locatie === locatie;
+                })
+                .sort((a, b) =>
+                    a.doosnummer.localeCompare(b.doosnummer)
+                );
+
+        if (dozenOpLocatie.length === 0) {
+            return;
+        }
+
+        const locatieKop =
+            document.createElement("div");
+
+        locatieKop.style.margin =
+            "28px 4px 12px";
+
+        locatieKop.style.fontSize =
+            "18px";
+
+        locatieKop.style.fontWeight =
+            "700";
+
+        locatieKop.innerHTML =
+            "📍 " +
+            escapeHtml(locatie) +
+            " · " +
+            dozenOpLocatie.length +
+            (dozenOpLocatie.length === 1
+                ? " doos"
+                : " dozen");
+
+        lijst.appendChild(locatieKop);
+
+        dozenOpLocatie.forEach(doos => {
+
+            const kaart =
+                document.createElement("div");
+
+            kaart.className = "card";
+            kaart.style.cursor = "pointer";
+
+            kaart.onclick = () =>
+                openDoos(doos.doosnummer);
+
+            kaart.innerHTML = `
+                <div style="
+                    font-size:20px;
+                    font-weight:700;
+                    margin-bottom:10px;
+                ">
+                    📦 ${escapeHtml(doos.doosnummer || "Onbekende doos")}
+                </div>
+
+                ${
+                    doos.notitie
+                        ? `
+                        <div style="
+                            color:#718187;
+                            font-size:14px;
+                            margin-bottom:12px;
+                        ">
+                            ${escapeHtml(doos.notitie)}
+                        </div>
+                        `
+                        : ""
+                }
+            `;
+
+            const productBlok =
+                document.createElement("div");
+
+            productBlok.style.marginTop = "12px";
+            productBlok.style.paddingTop = "12px";
+            productBlok.style.borderTop =
+                "1px solid #e0e7e8";
+
+            const doosProducten =
+                productenPerDoos[doos.doosnummer] || [];
+
+            doosProducten.forEach(product => {
+
+                const productRegel =
+                    document.createElement("div");
+
+                productRegel.style.marginBottom =
+                    "14px";
+
+                const portiesTekst =
+                    product.porties === null
+                        ? "niet bijgehouden"
+                        : product.porties;
+
+                const gewichtTekst =
+                    product.gewicht === null
+                        ? "niet bijgehouden"
+                        : product.gewicht + " gram";
+
+                productRegel.innerHTML = `
+                    <strong>
+                        🥩 ${escapeHtml(product.Naam || "Product")}
+                    </strong>
+                    <br>
+
+                    Porties:
+                    ${escapeHtml(String(portiesTekst))}
+                    <br>
+
+                    Gewicht:
+                    ${escapeHtml(String(gewichtTekst))}
+                    <br>
+
+                    Ingevroren:
+                    ${escapeHtml(product.invriesdatum || "-")}
+                    <br>
+
+                    Houdbaar tot:
+                    ${escapeHtml(product.houdbaar_tot || "-")}
+
+                    ${
+                        product.notitie
+                            ? `<br>📝 ${escapeHtml(product.notitie)}`
+                            : ""
+                    }
+                `;
+
+                productBlok.appendChild(productRegel);
+            });
+
+            kaart.appendChild(productBlok);
+
+            lijst.appendChild(kaart);
+        });
+    });
 }
 
     async function openDoos(doosnummer) {
