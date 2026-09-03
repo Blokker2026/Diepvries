@@ -354,7 +354,15 @@ textarea {
         </div>
     </div>
 </button>
-
+<button class="main-button" onclick="openZoeken()">
+    <div class="icon">🔎</div>
+    <div>
+        <div class="button-title">Product zoeken</div>
+        <div class="button-description">
+            Zoek op productnaam of soort
+        </div>
+    </div>
+</button>
 <button class="main-button" onclick="openOpnieuwVullen()">
     <div class="icon">♻️</div>
     <div>
@@ -463,7 +471,38 @@ font-weight: 700;
 
 </div>
 
+<!-- ============================= -->
+<!-- SCHERM: PRODUCT ZOEKEN -->
+<!-- ============================= -->
 
+<div id="zoekenScreen" class="screen">
+
+    <button class="back-button" onclick="goHome()">
+        ← Terug
+    </button>
+
+    <h2 class="title">🔎 Product zoeken</h2>
+
+    <div class="help">
+        Zoek op productnaam of soort.
+    </div>
+
+    <div class="card">
+
+        <label for="zoekProduct">Zoekterm</label>
+
+        <input
+            id="zoekProduct"
+            type="text"
+            placeholder="Bijvoorbeeld: kip"
+            oninput="zoekProducten()"
+        >
+
+    </div>
+
+    <div id="zoekResultaten"></div>
+
+</div>
 <!-- NIEUWE DOOS -->
 
 <div id="boxScreen" class="screen">
@@ -772,7 +811,15 @@ function showScreen(id) {
 function goHome() {
     showScreen("homeScreen");
 }
-    
+ function openZoeken() {
+
+    showScreen("zoekenScreen");
+
+    document.getElementById("zoekProduct").value = "";
+    document.getElementById("zoekResultaten").innerHTML = "";
+
+    document.getElementById("zoekProduct").focus();
+}   
        
     async function openGebruiken() {
 
