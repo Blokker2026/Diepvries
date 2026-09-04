@@ -2912,27 +2912,7 @@ async function saveBox() {
         return;
     }
 }
-const { data: bestaandeNieuweDoos, error: controleFout } = await voorraadDb
-    .from("dozen")
-    .select("doosnummer")
-    .eq("doosnummer", boxId)
-    .maybeSingle();
 
-if (controleFout) {
-    alert(
-        "Het doosnummer kon niet worden gecontroleerd:\n\n" +
-        controleFout.message
-    );
-    return;
-}
-
-if (bestaandeNieuweDoos) {
-    alert(
-        "Dit doosnummer bestaat al.\n\n" +
-        "Kies een ander doosnummer voor een nieuwe doos."
-    );
-    return;
-}
     const locatie =
         document.getElementById("location").value;
 
