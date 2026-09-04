@@ -3061,13 +3061,42 @@ if (
                 ? `<div>📝 ${escapeHtml(zakje.notitie)}</div>`
                 : ""
         }
+                <button
+            class="danger-button"
+            style="margin-top:16px;"
+            onclick="verwijderZakje(${zakje.id})">
+            🗑️ ZAKJE VERWIJDEREN
+        </button>
     `;
 
     lijst.appendChild(kaart);
 });
     });
 }
+async function verwijderZakje(zakjeId) {
 
+    const zeker =
+        confirm("Weet je zeker dat je dit zakje wilt verwijderen?");
+
+    if (!zeker) {
+        return;
+    }
+
+    const { error } = await voorraadDb
+        .from("Zakjes")
+        .delete()
+        .eq("id", zakjeId);
+
+    if (error) {
+        alert(
+            "Het zakje kon niet worden verwijderd:\n\n" +
+            error.message
+        );
+        return;
+    }
+
+    await openVoorraad();
+}
     async function openDoos(doosnummer) {
      nieuweDoosModus = false;
     const { data: doos, error: doosError } = await voorraadDb
