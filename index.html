@@ -2675,7 +2675,18 @@ async function openVoorraad() {
         console.log(productenFout);
         return;
     }
+const { data: zakjes, error: zakjesFout } = await voorraadDb
+    .from("Zakjes")
+    .select("*")
+    .order("id", { ascending: true });
 
+if (zakjesFout) {
+    loading.innerHTML =
+        "Er ging iets mis bij het laden van de zakjes.";
+
+    console.log(zakjesFout);
+    return;
+}
     loading.style.display = "none";
 
     const productenPerDoos = {};
