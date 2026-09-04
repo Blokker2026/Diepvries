@@ -2699,7 +2699,19 @@ if (zakjesFout) {
 
         productenPerDoos[product.doosnummer].push(product);
     });
+const zakjesPerLocatie = {};
 
+(zakjes || []).forEach(zakje => {
+
+    const locatie =
+        zakje.locatie || "Geen locatie";
+
+    if (!zakjesPerLocatie[locatie]) {
+        zakjesPerLocatie[locatie] = [];
+    }
+
+    zakjesPerLocatie[locatie].push(zakje);
+});
     const gevuldeDozen =
         (dozen || []).filter(doos =>
             productenPerDoos[doos.doosnummer] &&
