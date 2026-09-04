@@ -1075,7 +1075,19 @@ function openZoeken() {
         console.log(productFout);
         return;
     }
+const { data: zakjes, error: zakjesFout } = await voorraadDb
+    .from("Zakjes")
+    .select("id, locatie, naam, dierlijk_ingredient, gewicht, houdbaar_tot");
 
+if (zakjesFout) {
+    resultaten.innerHTML = `
+        <div class="card">
+            De losse zakjes konden niet worden geladen.
+        </div>
+    `;
+    console.log(zakjesFout);
+    return;
+}
     const { data: dozen, error: doosFout } = await voorraadDb
         .from("dozen")
         .select("doosnummer, locatie");
@@ -1110,8 +1122,23 @@ function openZoeken() {
             soort.includes(zoekterm)
         );
     });
+const gevondenZakjes = (zakjes || []).filter(zakje => {
 
-    if (gevonden.length === 0) {
+    const naam =
+        (zakje.naam || "").toLowerCase();
+
+    const soort =
+        (zakje.dierlijk_ingredient || "").toLowerCase();
+
+    return (
+        naam.includes(zoekterm) ||
+        soort.includes(zoekterm)
+    );
+});
+   if (
+    gevonden.length === 0 &&
+    gevondenZakjes.length === 0
+) {
         resultaten.innerHTML = `
             <div class="card">
                 Geen producten gevonden voor
@@ -1188,6 +1215,67 @@ function openZoeken() {
 
         resultaten.appendChild(kaart);
     });
+          gevonden.forEach(product => {
+
+    // bestaande productcode
+    // niets veranderen
+
+    resultaten.appendChild(kaart);
+});
+
+gevondenZakjes.forEach(zakje => {
+
+    const kaart =
+        document.createElement("div");
+
+    kaart.className = "card";
+
+    const gewichtTekst =
+        zakje.gewicht === null
+            ? "niet bijgehouden"
+            : zakje.gewicht + " gram";
+
+    kaart.innerHTML = `
+        <div style="
+            font-size:18px;
+            font-weight:700;
+            margin-bottom:8px;
+        ">
+            🥩 ${escapeHtml(zakje.naam || "Zakje")}
+        </div>
+
+        <div style="margin-bottom:4px;">
+            🛍️ Los zakje
+        </div>
+
+        <div style="margin-bottom:4px;">
+            📍 ${escapeHtml(zakje.locatie || "Geen locatie")}
+        </div>
+
+        ${
+            zakje.dierlijk_ingredient
+                ? `
+                <div style="margin-bottom:4px;">
+                    Soort:
+                    ${escapeHtml(zakje.dierlijk_ingredient)}
+                </div>
+                `
+                : ""
+        }
+
+        <div style="margin-bottom:4px;">
+            Gewicht:
+            ${escapeHtml(String(gewichtTekst))}
+        </div>
+
+        <div>
+            Houdbaar tot:
+            ${escapeHtml(zakje.houdbaar_tot || "-")}
+        </div>
+    `;
+
+    resultaten.appendChild(kaart);
+});
 } 
     function openGekozenDoosVoorWijzigen() {
 
