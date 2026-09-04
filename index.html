@@ -1006,17 +1006,21 @@ async function saveNieuwZakje() {
             ? null
             : Number(gewichtWaarde);
 
-    const { error } = await voorraadDb
-        .from("Zakjes")
-        .insert({
-            locatie: locatie,
-            naam: naam,
-            dierlijk_ingredient: soort || null,
-            gewicht: gewicht,
-            invriesdatum: invriesdatum || null,
-            houdbaar_tot: houdbaarTot || null,
-            notitie: notitie
-        });
+   const { data, error } = await voorraadDb
+    .from("Zakjes")
+    .insert({
+        locatie: locatie,
+        naam: naam,
+        dierlijk_ingredient: soort || null,
+        gewicht: gewicht,
+        invriesdatum: invriesdatum || null,
+        houdbaar_tot: houdbaarTot || null,
+        notitie: notitie
+    })
+    .select();
+
+console.log("Zakje data:", data);
+console.log("Zakje fout:", error);
 
     if (error) {
         alert(
@@ -1026,9 +1030,12 @@ async function saveNieuwZakje() {
         return;
     }
 
-    document
-        .getElementById("zakjeStatus")
-        .classList.add("visible");
+   alert("Zakje is opgeslagen in Supabase!");
+
+
+document
+    .getElementById("zakjeStatus")
+    .classList.add("visible");
 }
 
 function openZoeken() {
