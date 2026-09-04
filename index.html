@@ -1021,40 +1021,59 @@ function goHome() {
 
     showScreen("doosWijzigenScreen");
 
+    await ruimLegeProductenOp();
+
     const select =
         document.getElementById("wijzigDoosKeuze");
 
     select.innerHTML =
         '<option value="">Kies een doos...</option>';
 
-    const { data: dozen, error } = await voorraadDb
+    const { data: dozen, error: dozenFout } = await voorraadDb
         .from("dozen")
         .select("doosnummer, locatie")
         .order("doosnummer", { ascending: true });
 
-    if (error) {
+    if (dozenFout) {
         alert(
             "De dozen konden niet worden geladen:\n\n" +
-            error.message
+            dozenFout.message
         );
         return;
     }
 
-    (dozen || []).forEach(doos => {
+    const { data: producten, error: productenFout } = await voorraadDb
+        .from("Producten")
+        .select("doosnummer");
 
-        const option =
-            document.createElement("option");
+    if (productenFout) {
+        alert(
+            "De producten konden niet worden gecontroleerd:\n\n" +
+            productenFout.message
+        );
+        return;
+    }
 
-        option.value =
-            doos.doosnummer;
+    const gevuldeDozen =
+        new Set((producten || []).map(product => product.doosnummer));
 
-        option.textContent =
-            doos.doosnummer +
-            " - " +
-            (doos.locatie || "Geen locatie");
+    (dozen || [])
+        .filter(doos => gevuldeDozen.has(doos.doosnummer))
+        .forEach(doos => {
 
-        select.appendChild(option);
-    });
+            const option =
+                document.createElement("option");
+
+            option.value =
+                doos.doosnummer;
+
+            option.textContent =
+                doos.doosnummer +
+                " - " +
+                (doos.locatie || "Geen locatie");
+
+            select.appendChild(option);
+        });
 }
     async function openGebruiken() {
 
