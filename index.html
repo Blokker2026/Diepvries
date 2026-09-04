@@ -1101,7 +1101,13 @@ if (zakjesFout) {
         console.log(doosFout);
         return;
     }
-
+if (
+    document.getElementById("zoekProduct").value
+        .trim()
+        .toLowerCase() !== zoekterm
+) {
+    return;
+}
     const locatiePerDoos = {};
 
     (dozen || []).forEach(doos => {
