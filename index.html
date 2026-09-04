@@ -2718,7 +2718,10 @@ const zakjesPerLocatie = {};
             productenPerDoos[doos.doosnummer].length > 0
         );
 
-    if (gevuldeDozen.length === 0) {
+  if (
+    gevuldeDozen.length === 0 &&
+    (zakjes || []).length === 0
+) {
 
         lijst.innerHTML = `
             <div class="card">
@@ -2764,9 +2767,15 @@ const zakjesPerLocatie = {};
                     a.doosnummer.localeCompare(b.doosnummer)
                 );
 
-        if (dozenOpLocatie.length === 0) {
-            return;
-        }
+        const zakjesOpLocatie =
+    zakjesPerLocatie[locatie] || [];
+
+if (
+    dozenOpLocatie.length === 0 &&
+    zakjesOpLocatie.length === 0
+) {
+    return;
+}
 
         const locatieKop =
             document.createElement("div");
@@ -2780,14 +2789,19 @@ const zakjesPerLocatie = {};
         locatieKop.style.fontWeight =
             "700";
 
-        locatieKop.innerHTML =
-            "📍 " +
-            escapeHtml(locatie) +
-            " · " +
-            dozenOpLocatie.length +
-            (dozenOpLocatie.length === 1
-                ? " doos"
-                : " dozen");
+       locatieKop.innerHTML =
+    "📍 " +
+    escapeHtml(locatie) +
+    " · " +
+    dozenOpLocatie.length +
+    (dozenOpLocatie.length === 1
+        ? " doos"
+        : " dozen") +
+    " · " +
+    zakjesOpLocatie.length +
+    (zakjesOpLocatie.length === 1
+        ? " zakje"
+        : " zakjes");
 
         lijst.appendChild(locatieKop);
 
@@ -2899,6 +2913,70 @@ const zakjesPerLocatie = {};
 
             lijst.appendChild(kaart);
         });
+        zakjesOpLocatie.forEach(zakje => {
+
+    const kaart =
+        document.createElement("div");
+
+    kaart.className = "card";
+
+    const gewichtTekst =
+        zakje.gewicht === null
+            ? "niet bijgehouden"
+            : zakje.gewicht + " gram";
+
+    kaart.innerHTML = `
+        <div style="
+            font-size:20px;
+            font-weight:700;
+            margin-bottom:10px;
+        ">
+            🥩 ${escapeHtml(zakje.naam || "Zakje")}
+        </div>
+
+        <div style="
+            color:#718187;
+            font-size:14px;
+            margin-bottom:10px;
+        ">
+            Los zakje
+        </div>
+
+        ${
+            zakje.dierlijk_ingredient
+                ? `
+                <div>
+                    Soort:
+                    ${escapeHtml(zakje.dierlijk_ingredient)}
+                </div>
+                `
+                : ""
+        }
+
+        <div>
+            Gewicht:
+            ${escapeHtml(String(gewichtTekst))}
+        </div>
+
+        <div>
+            Ingevroren:
+            ${escapeHtml(zakje.invriesdatum || "-")}
+        </div>
+
+        <div>
+            Houdbaar tot:
+            ${escapeHtml(zakje.houdbaar_tot || "-")}
+        </div>
+
+        ${
+            zakje.notitie
+                ? `<div>📝 ${escapeHtml(zakje.notitie)}</div>`
+                : ""
+        }
+    `;
+
+    lijst.appendChild(kaart);
+});
     });
 }
 
