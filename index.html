@@ -437,7 +437,15 @@ font-weight: 700;
         </div>
     </div>
 </button>
-
+<button class="main-button" onclick="openNieuwZakje()">
+    <div class="icon">🥩</div>
+    <div>
+        <div class="button-title">Nieuw zakje</div>
+        <div class="button-description">
+            Voeg een los zakje zonder QR-code toe
+        </div>
+    </div>
+</button>
 <button class="main-button" onclick="openGenerator()">
     <div class="icon">▦</div>
     <div>
@@ -606,7 +614,96 @@ font-weight: 700;
     </div>
 
 </div>
+<!-- ============================= -->
+<!-- SCHERM: NIEUW ZAKJE -->
+<!-- ============================= -->
 
+<div id="nieuwZakjeScreen" class="screen">
+
+    <button class="back-button" onclick="goHome()">
+        ← Terug
+    </button>
+
+    <h2 class="title">🥩 Nieuw zakje</h2>
+
+    <div class="help">
+        Voeg een los zakje zonder QR-code toe aan de vriezervoorraad.
+    </div>
+
+    <div class="card">
+
+        <label>Locatie in vriezer</label>
+        <select id="zakjeLocatie">
+            <option value="">Kies een locatie...</option>
+            <option>Klep</option>
+            <option>Lade 1</option>
+            <option>Lade 2</option>
+            <option>Lade 3</option>
+            <option>Lade 4</option>
+            <option>Lade 5</option>
+            <option>Lade 6</option>
+            <option>Lade 7</option>
+        </select>
+
+        <label>Productnaam</label>
+        <input
+            id="zakjeNaam"
+            type="text"
+            placeholder="Bijvoorbeeld: kipfilet"
+        >
+
+        <label>Soort</label>
+        <select id="zakjeSoort">
+            <option value="">Kies een soort...</option>
+            <option value="Kip">Kip</option>
+            <option value="Rundvlees">Rundvlees</option>
+            <option value="Rundergehakt">Rundergehakt</option>
+            <option value="Varkensvlees">Varkensvlees</option>
+            <option value="Vis">Vis</option>
+            <option value="Vegetarisch">Vegetarisch</option>
+            <option value="Anders">Anders</option>
+            <option value="Niet van toepassing">Niet van toepassing</option>
+        </select>
+
+        <label>Gewicht in gram</label>
+        <input
+            id="zakjeGewicht"
+            type="number"
+            min="0"
+            placeholder="Bijvoorbeeld: 500"
+        >
+
+        <label>Invriesdatum</label>
+        <input
+            id="zakjeInvriesdatum"
+            type="date"
+        >
+
+        <label>Houdbaar tot</label>
+        <input
+            id="zakjeHoudbaarTot"
+            type="date"
+        >
+
+        <label>Notitie</label>
+        <textarea
+            id="zakjeNotitie"
+            placeholder="Bijvoorbeeld: 2 steaks, gemarineerd..."
+        ></textarea>
+
+    </div>
+
+    <button
+        class="primary-button"
+        onclick="saveNieuwZakje()">
+        💾 ZAKJE OPSLAAN
+    </button>
+
+    <div id="zakjeStatus" class="status">
+        ✅ Zakje opgeslagen
+    </div>
+
+</div>
 
 <!-- SCANNER -->
 
@@ -852,6 +949,23 @@ function showScreen(id) {
 
 function goHome() {
     showScreen("homeScreen");
+}
+    function openNieuwZakje() {
+
+    showScreen("nieuwZakjeScreen");
+
+    document.getElementById("zakjeLocatie").value = "";
+    document.getElementById("zakjeNaam").value = "";
+    document.getElementById("zakjeSoort").value = "";
+    document.getElementById("zakjeGewicht").value = "";
+    document.getElementById("zakjeInvriesdatum").value = "";
+    document.getElementById("zakjeHoudbaarTot").value = "";
+    document.getElementById("zakjeNotitie").value = "";
+
+    const status =
+        document.getElementById("zakjeStatus");
+
+    status.classList.remove("visible");
 }
  function openZoeken() {
 
