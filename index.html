@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>VoorraadBox</title>
+<title>VoorraadBlox</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -329,8 +329,8 @@ textarea {
 
     <div class="header">
         <div class="logo">📦</div>
-        <h1>VoorraadBox</h1>
-        <div class="subtitle">Jouw digitale voorraadkast</div>
+      <h1>VoorraadBlox</h1>
+<div class="subtitle">Jouw digitale vriezervoorraad</div>
     </div>
 
     <button class="main-button scan" onclick="openScanner()">
@@ -452,7 +452,7 @@ font-weight: 700;
 <!-- gewone knoppen van Voorraad hierboven -->
 
    
-    <div class="footer">VoorraadBox • versie 1.2</div>
+   <div class="footer">VoorraadBlox • versie 1.2</div>
 </div>
 
 
@@ -3296,7 +3296,7 @@ function continueToBox() {
     if (!scannedCode.startsWith("DOOS-")) {
 
         alert(
-            "Deze QR-code hoort niet bij VoorraadBox."
+            "Deze QR-code hoort niet bij VoorraadBlox."
         );
 
         return;
