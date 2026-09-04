@@ -950,7 +950,7 @@ function showScreen(id) {
 function goHome() {
     showScreen("homeScreen");
 }
-    function openNieuwZakje() {
+ function openNieuwZakje() {
 
     showScreen("nieuwZakjeScreen");
 
@@ -967,11 +967,71 @@ function goHome() {
 
     status.classList.remove("visible");
 }
-    async function saveNieuwZakje() {
-    ...
-}
- function openZoeken() {
 
+async function saveNieuwZakje() {
+
+    const locatie =
+        document.getElementById("zakjeLocatie").value;
+
+    const naam =
+        document.getElementById("zakjeNaam").value.trim();
+
+    const soort =
+        document.getElementById("zakjeSoort").value;
+
+    const gewichtWaarde =
+        document.getElementById("zakjeGewicht").value;
+
+    const invriesdatum =
+        document.getElementById("zakjeInvriesdatum").value;
+
+    const houdbaarTot =
+        document.getElementById("zakjeHoudbaarTot").value;
+
+    const notitie =
+        document.getElementById("zakjeNotitie").value.trim();
+
+    if (!locatie) {
+        alert("Kies eerst een locatie.");
+        return;
+    }
+
+    if (!naam) {
+        alert("Vul eerst een productnaam in.");
+        return;
+    }
+
+    const gewicht =
+        gewichtWaarde === ""
+            ? null
+            : Number(gewichtWaarde);
+
+    const { error } = await voorraadDb
+        .from("Zakjes")
+        .insert({
+            locatie: locatie,
+            naam: naam,
+            dierlijk_ingredient: soort || null,
+            gewicht: gewicht,
+            invriesdatum: invriesdatum || null,
+            houdbaar_tot: houdbaarTot || null,
+            notitie: notitie
+        });
+
+    if (error) {
+        alert(
+            "Het zakje kon niet worden opgeslagen:\n\n" +
+            error.message
+        );
+        return;
+    }
+
+    document
+        .getElementById("zakjeStatus")
+        .classList.add("visible");
+}
+
+function openZoeken() {
     showScreen("zoekenScreen");
 
     document.getElementById("zoekProduct").value = "";
