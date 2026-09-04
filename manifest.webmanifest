@@ -1,7 +1,7 @@
 {
-  "name": "VoorraadBox",
-  "short_name": "VoorraadBox",
-  "description": "Digitale voorraadbeheer-app voor voorraadboxen",
+  "name": "VoorraadBlox",
+"short_name": "VoorraadBlox",
+"description": "Digitale app voor jouw vriezervoorraad",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
