@@ -2930,10 +2930,12 @@ const locaties = gekozenLocatie
     const heeftGeenLocatie =
         gevuldeDozen.some(doos => !doos.locatie);
 
-    if (heeftGeenLocatie) {
-        locaties.push("Geen locatie");
-    }
-
+  if (
+    !gekozenLocatie &&
+    heeftGeenLocatie
+) {
+    locaties.push("Geen locatie");
+}
     locaties.forEach(locatie => {
 
         const dozenOpLocatie =
