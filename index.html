@@ -366,10 +366,10 @@ textarea {
     <button class="main-button" onclick="openNieuwZakje()">
     <div class="icon">🥩</div>
     <div>
-        <div class="button-title">Nieuw zakje</div>
-        <div class="button-description">
-            Voeg een los zakje zonder QR-code toe
-        </div>
+        <div class="button-title">Nieuw los product</div>
+<div class="button-description">
+    Voeg een los product zonder QR-code toe
+</div>
     </div>
 </button>
     <button class="main-button" onclick="openDoosWijzigen()">
@@ -705,12 +705,11 @@ font-weight: 700;
         ← Terug
     </button>
 
-    <h2 class="title">🥩 Nieuw zakje</h2>
+   <h2 class="title">🧊 Nieuw los product</h2>
 
-    <div class="help">
-        Voeg een los zakje zonder QR-code toe aan de vriezervoorraad.
-    </div>
-
+<div class="help">
+    Voeg een los product zonder QR-code toe aan de vriezervoorraad.
+</div>
     <div class="card">
 
         <label>Locatie in vriezer</label>
@@ -745,7 +744,15 @@ font-weight: 700;
             <option value="Anders">Anders</option>
             <option value="Niet van toepassing">Niet van toepassing</option>
         </select>
-
+  
+        <label>Aantal stuks</label>
+    <input
+    id="zakjeAantal"
+    type="number"
+    min="0"
+    step="1"
+    placeholder="Bijvoorbeeld: 5"
+>
         <label>Gewicht in gram</label>
         <input
             id="zakjeGewicht"
@@ -777,11 +784,11 @@ font-weight: 700;
     <button
         class="primary-button"
         onclick="saveNieuwZakje()">
-        💾 ZAKJE OPSLAAN
+        💾 LOS PRODUCT OPSLAAN
     </button>
 
     <div id="zakjeStatus" class="status">
-        ✅ Zakje opgeslagen
+        ✅ los product opgeslagen
     </div>
 
 </div>
@@ -1038,6 +1045,7 @@ function goHome() {
     document.getElementById("zakjeLocatie").value = "";
     document.getElementById("zakjeNaam").value = "";
     document.getElementById("zakjeSoort").value = "";
+    document.getElementById("zakjeAantal").value = "";
     document.getElementById("zakjeGewicht").value = "";
     document.getElementById("zakjeInvriesdatum").value = "";
     document.getElementById("zakjeHoudbaarTot").value = "";
@@ -1059,7 +1067,10 @@ async function saveNieuwZakje() {
 
     const soort =
         document.getElementById("zakjeSoort").value;
-
+    
+    const aantalWaarde =
+    document.getElementById("zakjeAantal").value;
+    
     const gewichtWaarde =
         document.getElementById("zakjeGewicht").value;
 
@@ -1081,7 +1092,17 @@ async function saveNieuwZakje() {
         alert("Vul eerst een productnaam in.");
         return;
     }
-
+    const aantal =
+    aantalWaarde === ""
+        ? null
+        : Number(aantalWaarde);
+    if (
+    aantal !== null &&
+    (!Number.isInteger(aantal) || aantal < 0)
+) {
+    alert("Vul bij aantal een heel positief getal in.");
+    return;
+}
     const gewicht =
         gewichtWaarde === ""
             ? null
@@ -1093,6 +1114,7 @@ async function saveNieuwZakje() {
         locatie: locatie,
         naam: naam,
         dierlijk_ingredient: soort || null,
+        aantal: aantal,
         gewicht: gewicht,
         invriesdatum: invriesdatum || null,
         houdbaar_tot: houdbaarTot || null,
@@ -1111,7 +1133,7 @@ console.log("Zakje fout:", error);
         return;
     }
 
-   alert("Zakje is opgeslagen in Supabase!");
+   alert("Los product is opgeslagen");
 
 
 document
@@ -1167,7 +1189,7 @@ function openZoeken() {
     }
 const { data: zakjes, error: zakjesFout } = await voorraadDb
     .from("Zakjes")
-    .select("id, locatie, naam, dierlijk_ingredient, gewicht, houdbaar_tot");
+    .select("id, locatie, naam, dierlijk_ingredient, aantal, gewicht, invriesdatum, houdbaar_tot, notitie")
 
 if (zakjesFout) {
     resultaten.innerHTML = `
@@ -1335,7 +1357,7 @@ gevondenZakjes.forEach(zakje => {
         </div>
 
         <div style="margin-bottom:4px;">
-            🛍️ Los zakje
+            🛍️ Los product
         </div>
 
         <div style="margin-bottom:4px;">
@@ -1352,7 +1374,17 @@ gevondenZakjes.forEach(zakje => {
                 `
                 : ""
         }
-
+        ${
+            zakje.aantal !== null
+        ? `
+        <div style="margin-bottom:4px;">
+            Aantal:
+            ${escapeHtml(String(zakje.aantal))} stuks
+        </div>
+        `
+        : ""
+        }
+        
         <div style="margin-bottom:4px;">
             Gewicht:
             ${escapeHtml(String(gewichtTekst))}
@@ -3123,7 +3155,7 @@ if (
             font-size:14px;
             margin-bottom:10px;
         ">
-            Los zakje
+            Los product
         </div>
 
         ${
@@ -3136,7 +3168,16 @@ if (
                 `
                 : ""
         }
-
+        ${
+        zakje.aantal !== null
+        ? `
+        <div>
+            Aantal:
+            ${escapeHtml(String(zakje.aantal))} stuks
+        </div>
+        `
+        : ""
+}
         <div>
             Gewicht:
             ${escapeHtml(String(gewichtTekst))}
@@ -3161,7 +3202,7 @@ if (
             class="danger-button"
             style="margin-top:16px;"
             onclick="verwijderZakje(${zakje.id})">
-            🗑️ ZAKJE VERWIJDEREN
+            🗑️ LOS PRODUCT VERWIJDEREN
         </button>
     `;
 
@@ -3172,7 +3213,7 @@ if (
 async function verwijderZakje(zakjeId) {
 
     const zeker =
-        confirm("Weet je zeker dat je dit zakje wilt verwijderen?");
+        confirm("Weet je zeker dat je dit los product wilt verwijderen?");
 
     if (!zeker) {
         return;
@@ -3185,7 +3226,7 @@ async function verwijderZakje(zakjeId) {
 
     if (error) {
         alert(
-            "Het zakje kon niet worden verwijderd:\n\n" +
+            "Het los product kon niet worden verwijderd:\n\n" +
             error.message
         );
         return;
