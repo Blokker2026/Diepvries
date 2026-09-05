@@ -345,7 +345,7 @@ textarea {
 
     <div class="section-title">Voorraad beheren</div>
 
-<button class="main-button" onclick="openVoorraad()">
+<button class="main-button" onclick="showScreen('voorraadKeuzeScreen')">
    <div class="icon">📦</div>
     <div>
         <div class="button-title">Voorraad</div>
@@ -466,7 +466,87 @@ font-weight: 700;
 
 
 <!-- NIEUWE DOOS -->
+<!-- ============================= -->
+<!-- SCHERM: KIES LADE -->
+<!-- ============================= -->
 
+<div id="voorraadKeuzeScreen" class="screen">
+
+    <button class="back-button" onclick="goHome()">
+        ← Terug
+    </button>
+
+    <h2 class="title">🧊 Kies een lade</h2>
+
+    <div class="help">
+        Kies waar je de voorraad van wilt bekijken.
+    </div>
+
+    <button class="main-button" onclick="openVoorraadLocatie('Klep')">
+        <div class="icon">🚪</div>
+        <div>
+            <div class="button-title">Klep</div>
+            <div class="button-description">
+                Bekijk de inhoud van de klep
+            </div>
+        </div>
+    </button>
+
+    <button class="main-button" onclick="openVoorraadLocatie('Lade 1')">
+        <div class="icon">1️⃣</div>
+        <div>
+            <div class="button-title">Lade 1</div>
+        </div>
+    </button>
+
+    <button class="main-button" onclick="openVoorraadLocatie('Lade 2')">
+        <div class="icon">2️⃣</div>
+        <div>
+            <div class="button-title">Lade 2</div>
+        </div>
+    </button>
+
+    <button class="main-button" onclick="openVoorraadLocatie('Lade 3')">
+        <div class="icon">3️⃣</div>
+        <div>
+            <div class="button-title">Lade 3</div>
+        </div>
+    </button>
+
+    <button class="main-button" onclick="openVoorraadLocatie('Lade 4')">
+        <div class="icon">4️⃣</div>
+        <div>
+            <div class="button-title">Lade 4</div>
+        </div>
+    </button>
+
+    <button class="main-button" onclick="openVoorraadLocatie('Lade 5')">
+        <div class="icon">5️⃣</div>
+        <div>
+            <div class="button-title">Lade 5</div>
+        </div>
+    </button>
+
+    <button class="main-button" onclick="openVoorraadLocatie('Lade 6')">
+        <div class="icon">6️⃣</div>
+        <div>
+            <div class="button-title">Lade 6</div>
+        </div>
+    </button>
+
+    <button class="main-button" onclick="openVoorraadLocatie('Lade 7')">
+        <div class="icon">7️⃣</div>
+        <div>
+            <div class="button-title">Lade 7</div>
+        </div>
+    </button>
+
+   <button class="secondary-button" onclick="sessionStorage.removeItem('voorraadGekozenLocatie'); openVoorraad()">
+       
+        📋 ALLES BEKIJKEN
+    </button>
+
+</div>
 <!-- ============================= -->
 <!-- SCHERM: VOORRAAD -->
 <!-- ============================= -->
@@ -1047,6 +1127,15 @@ function openZoeken() {
 
     document.getElementById("zoekProduct").focus();
 }   
+    function openVoorraadLocatie(locatie) {
+
+    sessionStorage.setItem(
+        "voorraadGekozenLocatie",
+        locatie
+    );
+
+    openVoorraad();
+}
       async function zoekProducten() {
 
     const zoekterm =
@@ -2823,7 +2912,12 @@ const zakjesPerLocatie = {};
         return;
     }
 
-    const locaties = [
+   const gekozenLocatie =
+    sessionStorage.getItem("voorraadGekozenLocatie");
+
+const locaties = gekozenLocatie
+    ? [gekozenLocatie]
+    : [
         "Klep",
         "Lade 1",
         "Lade 2",
@@ -2833,7 +2927,6 @@ const zakjesPerLocatie = {};
         "Lade 6",
         "Lade 7"
     ];
-
     const heeftGeenLocatie =
         gevuldeDozen.some(doos => !doos.locatie);
 
