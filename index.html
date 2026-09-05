@@ -745,7 +745,17 @@ font-weight: 700;
     <option value="Maaltijd">Maaltijd</option>
     <option value="Overig">Overig</option>
 </select>
-  
+        
+  <label>Verpakking</label>
+<select id="zakjeVerpakking">
+    <option value="">Kies een verpakking...</option>
+    <option value="Zak">Zak</option>
+    <option value="Doosje">Doosje</option>
+    <option value="Bakje">Bakje</option>
+    <option value="Los">Los</option>
+    <option value="Anders">Anders</option>
+</select>
+        
         <label>Aantal stuks</label>
     <input
     id="zakjeAantal"
@@ -1046,6 +1056,7 @@ function goHome() {
     document.getElementById("zakjeLocatie").value = "";
     document.getElementById("zakjeNaam").value = "";
     document.getElementById("zakjeSoort").value = "";
+    document.getElementById("zakjeVerpakking").value = "";
     document.getElementById("zakjeAantal").value = "";
     document.getElementById("zakjeGewicht").value = "";
     document.getElementById("zakjeInvriesdatum").value = "";
@@ -1068,6 +1079,9 @@ async function saveNieuwZakje() {
 
     const soort =
         document.getElementById("zakjeSoort").value;
+    
+    const verpakking =
+    document.getElementById("zakjeVerpakking").value;
     
     const aantalWaarde =
     document.getElementById("zakjeAantal").value;
@@ -1115,6 +1129,7 @@ async function saveNieuwZakje() {
         locatie: locatie,
         naam: naam,
         dierlijk_ingredient: soort || null,
+        verpakking: verpakking || null,
         aantal: aantal,
         gewicht: gewicht,
         invriesdatum: invriesdatum || null,
@@ -1190,7 +1205,7 @@ function openZoeken() {
     }
 const { data: zakjes, error: zakjesFout } = await voorraadDb
     .from("Zakjes")
-    .select("id, locatie, naam, dierlijk_ingredient, aantal, gewicht, houdbaar_tot");
+    .select("id, locatie, naam, dierlijk_ingredient, verpakking, aantal, gewicht, invriesdatum, houdbaar_tot, notitie");
 if (zakjesFout) {
     resultaten.innerHTML = `
         <div class="card">
@@ -1374,6 +1389,16 @@ gevondenZakjes.forEach(zakje => {
                 `
                 : ""
         }
+        ${
+        zakje.verpakking
+        ? `
+        <div>
+            Verpakking:
+            ${escapeHtml(zakje.verpakking)}
+        </div>
+        `
+        : ""
+}
         ${
             zakje.aantal !== null
         ? `
