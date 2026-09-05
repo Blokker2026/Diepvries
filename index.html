@@ -359,7 +359,7 @@ textarea {
     <div>
         <div class="button-title">Product zoeken</div>
         <div class="button-description">
-            Zoek op productnaam of soort
+            Zoek op productnaam of Categorie
         </div>
     </div>
 </button>
@@ -582,7 +582,7 @@ font-weight: 700;
     <h2 class="title">🔎 Product zoeken</h2>
 
     <div class="help">
-        Zoek op productnaam of soort.
+        Zoek op productnaam of categorie.
     </div>
 
     <div class="card">
@@ -732,18 +732,19 @@ font-weight: 700;
             placeholder="Bijvoorbeeld: kipfilet"
         >
 
-        <label>Soort</label>
-        <select id="zakjeSoort">
-            <option value="">Kies een soort...</option>
-            <option value="Kip">Kip</option>
-            <option value="Rundvlees">Rundvlees</option>
-            <option value="Rundergehakt">Rundergehakt</option>
-            <option value="Varkensvlees">Varkensvlees</option>
-            <option value="Vis">Vis</option>
-            <option value="Vegetarisch">Vegetarisch</option>
-            <option value="Anders">Anders</option>
-            <option value="Niet van toepassing">Niet van toepassing</option>
-        </select>
+       <label>Categorie</label>
+<select id="zakjeSoort">
+    <option value="">Kies een categorie...</option>
+    <option value="Vlees">Vlees</option>
+    <option value="Vis">Vis</option>
+    <option value="Snacks">Snacks</option>
+    <option value="Aardappelproducten">Aardappelproducten</option>
+    <option value="Groente">Groente</option>
+    <option value="Brood">Brood</option>
+    <option value="Vegetarisch">Vegetarisch</option>
+    <option value="Maaltijd">Maaltijd</option>
+    <option value="Overig">Overig</option>
+</select>
   
         <label>Aantal stuks</label>
     <input
@@ -1307,7 +1308,7 @@ const gevondenZakjes = (zakjes || []).filter(zakje => {
                 product.dierlijk_ingredient
                     ? `
                     <div style="margin-bottom:4px;">
-                        Soort:
+                        Categorie:
                         ${escapeHtml(product.dierlijk_ingredient)}
                     </div>
                     `
@@ -1367,7 +1368,7 @@ gevondenZakjes.forEach(zakje => {
             zakje.dierlijk_ingredient
                 ? `
                 <div style="margin-bottom:4px;">
-                    Soort:
+                    Categorie:
                     ${escapeHtml(zakje.dierlijk_ingredient)}
                 </div>
                 `
@@ -3092,7 +3093,7 @@ if (
                     ${
                     product.dierlijk_ingredient
                     ? `
-                    Soort:
+                    Categorie:
                     ${escapeHtml(product.dierlijk_ingredient)}
                         <br>
                         `
@@ -3161,7 +3162,7 @@ if (
             zakje.dierlijk_ingredient
                 ? `
                 <div>
-                    Soort:
+                    Categorie:
                     ${escapeHtml(zakje.dierlijk_ingredient)}
                 </div>
                 `
