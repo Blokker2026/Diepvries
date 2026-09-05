@@ -1189,8 +1189,7 @@ function openZoeken() {
     }
 const { data: zakjes, error: zakjesFout } = await voorraadDb
     .from("Zakjes")
-    .select("id, locatie, naam, dierlijk_ingredient, aantal, gewicht, invriesdatum, houdbaar_tot, notitie")
-
+    .select("id, locatie, naam, dierlijk_ingredient, aantal, gewicht, houdbaar_tot");
 if (zakjesFout) {
     resultaten.innerHTML = `
         <div class="card">
