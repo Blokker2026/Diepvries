@@ -2714,7 +2714,20 @@ async function openBijnaVerlopen() {
         .select("id, doosnummer, Naam, houdbaar_tot")
         .not("houdbaar_tot", "is", null)
         .order("houdbaar_tot", { ascending: true });
+const { data: losseProducten, error: losseProductenFout } =
+    await voorraadDb
+        .from("Zakjes")
+        .select("id, locatie, naam, houdbaar_tot")
+        .not("houdbaar_tot", "is", null)
+        .order("houdbaar_tot", { ascending: true });
+    if (losseProductenFout) {
 
+    loading.innerHTML =
+        "De houdbaarheidsdatums van losse producten konden niet worden geladen.";
+
+    console.log(losseProductenFout);
+    return;
+}
     if (error) {
 
         loading.innerHTML =
@@ -2728,7 +2741,41 @@ async function openBijnaVerlopen() {
     vandaag.setHours(0, 0, 0, 0);
 
     const bijnaVerlopen = [];
+(losseProducten || []).forEach(product => {
 
+    if (!product.houdbaar_tot) {
+        return;
+    }
+
+    const delen =
+        product.houdbaar_tot.split("-");
+
+    const houdbaarDatum =
+        new Date(
+            Number(delen[0]),
+            Number(delen[1]) - 1,
+            Number(delen[2])
+        );
+
+    houdbaarDatum.setHours(0, 0, 0, 0);
+
+    const verschil =
+        houdbaarDatum.getTime() -
+        vandaag.getTime();
+
+    const dagen =
+        Math.round(
+            verschil / (1000 * 60 * 60 * 24)
+        );
+
+    if (dagen <= 15) {
+        bijnaVerlopen.push({
+            ...product,
+            dagen: dagen,
+            isLosProduct: true
+        });
+    }
+});
     (producten || []).forEach(product => {
 
         if (!product.houdbaar_tot) {
@@ -2834,13 +2881,17 @@ async function openBijnaVerlopen() {
             datumDelen[0];
 
         kaart.innerHTML = `
-            <div style="
-                font-size:18px;
-                font-weight:700;
-                margin-bottom:10px;
-            ">
-                📦 ${escapeHtml(product.doosnummer)}
-            </div>
+           <div style="
+    font-size:18px;
+    font-weight:700;
+    margin-bottom:10px;
+">
+    ${
+        product.isLosProduct
+            ? `📍 ${escapeHtml(product.locatie || "Geen locatie")}`
+            : `📦 ${escapeHtml(product.doosnummer || "-")}`
+    }
+</div>
 
             <div style="
                 font-size:17px;
