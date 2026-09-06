@@ -2898,7 +2898,11 @@ const { data: losseProducten, error: losseProductenFout } =
                 font-weight:700;
                 margin-bottom:8px;
             ">
-                ${escapeHtml(product.Naam || "Product")}
+                ${
+    product.isLosProduct
+        ? escapeHtml(product.naam || "Los product")
+        : escapeHtml(product.Naam || "Product")
+}
             </div>
 
             <div style="
