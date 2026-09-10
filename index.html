@@ -4039,7 +4039,54 @@ async function testSupabaseVerbinding() {
 }
     
 </script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import {
+        getFirestore,
+        collection,
+        getDocs,
+        query,
+        limit
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
+    const firebaseConfig = {
+        apiKey: "AIzaSyDbIGJWR7Ky632Ln50gnuSaQEy3AL6TMsY",
+        authDomain: "voorraadblox-f8a94.firebaseapp.com",
+        projectId: "voorraadblox-f8a94",
+        storageBucket: "voorraadblox-f8a94.firebasestorage.app",
+        messagingSenderId: "124375160633",
+        appId: "1:124375160633:web:f751fdae01c827c320bae8"
+    };
+
+    const firebaseApp = initializeApp(firebaseConfig);
+    const firebaseDb = getFirestore(firebaseApp);
+
+    window.testFirebaseVerbinding = async function() {
+        try {
+            const testQuery = query(
+                collection(firebaseDb, "dozen"),
+                limit(1)
+            );
+
+            const snapshot = await getDocs(testQuery);
+
+            alert("Verbinding met Firebase werkt! ✅");
+
+            console.log(
+                "Firebase test geslaagd. Aantal gevonden documenten:",
+                snapshot.size
+            );
+
+        } catch (error) {
+            alert(
+                "Verbinding met Firebase mislukt:\n\n" +
+                error.message
+            );
+
+            console.error("Firebase fout:", error);
+        }
+    };
+</script>
 </body>
 </html>
 
