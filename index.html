@@ -3766,7 +3766,12 @@ async function saveBox() {
         }
     }
 
-
+await slaDoosOokOpInFirebase(
+    boxId,
+    locatie,
+    doosNotitie,
+    producten
+);
     // -----------------------------
     // 6. BEVESTIGING
     // -----------------------------
@@ -4129,7 +4134,34 @@ async function testSupabaseVerbinding() {
         console.error("Firebase schrijffout:", error);
     }
 };
-    
+ window.slaDoosOokOpInFirebase = async function(boxId, locatie, doosNotitie, producten) {
+    try {
+        const { doc, setDoc } = await import(
+            "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
+        );
+
+        await setDoc(
+            doc(firebaseDb, "dozen", boxId),
+            {
+                doosnummer: boxId,
+                locatie: locatie || "",
+                notitie: doosNotitie || "",
+                producten: producten,
+                updated_at: new Date().toISOString()
+            }
+        );
+
+        console.log("Doos ook opgeslagen in Firebase:", boxId);
+
+    } catch (error) {
+        console.error("Opslaan in Firebase mislukt:", error);
+
+        alert(
+            "De doos is wel in Supabase opgeslagen, maar nog niet in Firebase.\n\n" +
+            error.message
+        );
+    }
+};   
 </script>
 </body>
 </html>
