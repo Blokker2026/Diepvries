@@ -2959,18 +2959,17 @@ async function openVoorraad() {
 
     lijst.innerHTML = "";
 
-    const { data: dozen, error: dozenFout } = await voorraadDb
-        .from("dozen")
-        .select("*")
-        .order("doosnummer", { ascending: true });
+   let dozen = [];
 
-    if (dozenFout) {
-        loading.innerHTML =
-            "Er ging iets mis bij het laden van de voorraad.";
+try {
+    dozen = await window.haalDozenUitFirebase();
+} catch (error) {
+    loading.innerHTML =
+        "Er ging iets mis bij het laden van de voorraad.";
 
-        console.log(dozenFout);
-        return;
-    }
+    console.error("Firebase voorraadfout:", error);
+    return;
+}
 
     const { data: producten, error: productenFout } = await voorraadDb
         .from("Producten")
