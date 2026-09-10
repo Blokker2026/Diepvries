@@ -469,6 +469,15 @@ font-weight: 700;
         </div>
     </div>
 </button>
+    <button class="main-button" onclick="testFirebaseSchrijven()">
+    <div class="icon">✍️</div>
+    <div>
+        <div class="button-title">Firebase schrijven testen</div>
+        <div class="button-description">
+            Schrijf een testregel naar Firestore
+        </div>
+    </div>
+</button>
     
    <div class="footer">VoorraadBlox • versie 1.2</div>
 </div>
@@ -4095,6 +4104,32 @@ async function testSupabaseVerbinding() {
             console.error("Firebase fout:", error);
         }
     };
+    window.testFirebaseSchrijven = async function() {
+    try {
+        const { doc, setDoc } = await import(
+            "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
+        );
+
+        await setDoc(
+            doc(firebaseDb, "test", "verbinding"),
+            {
+                bericht: "VoorraadBlox schrijft naar Firebase",
+                datum: new Date().toISOString()
+            }
+        );
+
+        alert("Schrijven naar Firebase werkt! ✅");
+
+    } catch (error) {
+        alert(
+            "Schrijven naar Firebase mislukt:\n\n" +
+            error.message
+        );
+
+        console.error("Firebase schrijffout:", error);
+    }
+};
+    
 </script>
 </body>
 </html>
