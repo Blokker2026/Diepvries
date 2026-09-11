@@ -2995,21 +2995,7 @@ try {
 let zakjes = [];
 
 try {
-    const { collection, getDocs } = await import(
-        "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
-    );
-
-    const snapshot = await getDocs(
-        collection(firebaseDb, "zakjes")
-    );
-
-    snapshot.forEach(doc => {
-        zakjes.push({
-            id: doc.id,
-            ...doc.data()
-        });
-    });
-
+    zakjes = await window.haalZakjesUitFirebase();
 } catch (error) {
     loading.innerHTML =
         "Er ging iets mis bij het laden van de zakjes.";
@@ -4214,7 +4200,26 @@ async function testSupabaseVerbinding() {
 
     return dozen;
 };
- 
+ window.haalZakjesUitFirebase = async function() {
+    const { collection, getDocs } = await import(
+        "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
+    );
+
+    const snapshot = await getDocs(
+        collection(firebaseDb, "zakjes")
+    );
+
+    const zakjes = [];
+
+    snapshot.forEach(doc => {
+        zakjes.push({
+            id: doc.id,
+            ...doc.data()
+        });
+    });
+
+    return zakjes;
+};
 window.slaZakjeOokOpInFirebase = async function(zakje) {
     try {
         const { collection, addDoc } = await import(
