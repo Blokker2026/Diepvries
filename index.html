@@ -2625,28 +2625,38 @@ async function maakDoosLeeg() {
         return;
     }
 
-    const { data: producten, error: leesFout } = await voorraadDb
-        .from("Producten")
-        .select("id, Naam")
-        .eq("doosnummer", doosnummer);
+    let resultaat;
 
-    if (leesFout) {
+    try {
+        resultaat =
+            await window.maakDoosLeegInFirebase(doosnummer);
+
+    } catch (error) {
         alert(
-            "De inhoud van de doos kon niet worden gecontroleerd:\n\n" +
-            leesFout.message
+            "De doos kon niet worden leeggemaakt:\n\n" +
+            error.message
         );
+
+        console.error(
+            "Firebase doos-leeg-fout:",
+            error
+        );
+
         return;
     }
 
-    if (!producten || producten.length === 0) {
+    if (resultaat.aantalProducten === 0) {
         alert("Deze doos is al leeg.");
-        await laadDoosVoorLeegmaken();
         return;
     }
 
     const bevestigd = confirm(
-        "Weet je zeker dat je " + doosnummer + " volledig wilt leegmaken?\n\n" +
-        "Alle " + producten.length + " product(en) in deze doos worden verwijderd.\n\n" +
+        "Weet je zeker dat je " +
+        doosnummer +
+        " volledig wilt leegmaken?\n\n" +
+        "Alle " +
+        resultaat.aantalProducten +
+        " product(en) in deze doos worden verwijderd.\n\n" +
         "De doos zelf en het kenmerk van de doos blijven bewaard."
     );
 
@@ -2654,51 +2664,32 @@ async function maakDoosLeeg() {
         return;
     }
 
-    const { data: verwijderdeRijen, error: deleteFout } = await voorraadDb
-        .from("Producten")
-        .delete()
-        .eq("doosnummer", doosnummer)
-        .select("id");
+    try {
+        await window.bevestigDoosLeegmakenInFirebase(doosnummer);
 
-    if (deleteFout) {
+    } catch (error) {
         alert(
             "De doos kon niet worden leeggemaakt:\n\n" +
-            deleteFout.message
+            error.message
         );
+
+        console.error(
+            "Firebase doos-leeg-fout:",
+            error
+        );
+
         return;
     }
 
-    if (!verwijderdeRijen || verwijderdeRijen.length !== producten.length) {
-        alert(
-            "Niet alle producten zijn verwijderd.\n\n" +
-            "Verwacht: " + producten.length +
-            "\nVerwijderd: " + (verwijderdeRijen ? verwijderdeRijen.length : 0)
-        );
-        await laadDoosVoorLeegmaken();
-        return;
-    }
-const { error: locatieFout } = await voorraadDb
-    .from("dozen")
-    .update({
-        locatie: "",
-        updated_at: new Date().toISOString()
-    })
-    .eq("doosnummer", doosnummer);
-
-if (locatieFout) {
-    alert(
-        "De locatie van de lege doos kon niet worden gewist:\n\n" +
-        locatieFout.message
-    );
-    return;
-}
     const status =
         document.getElementById("doosLeegStatus");
 
     status.innerHTML =
         "✅ DOOS LEEG<br><br>" +
-        escapeHtml(doosnummer) + " is leeggemaakt.<br>" +
-        verwijderdeRijen.length + " product(en) verwijderd.<br>" +
+        escapeHtml(doosnummer) +
+        " is leeggemaakt.<br>" +
+        resultaat.aantalProducten +
+        " product(en) verwijderd.<br>" +
         "De doosgegevens zijn bewaard.";
 
     status.classList.add("visible");
@@ -4345,6 +4336,38 @@ window.slaZakjeOokOpInFirebase = async function(zakje) {
 
     await updateDoc(doosRef, {
         producten: producten,
+        updated_at: new Date().toISOString()
+    });
+};
+    window.maakDoosLeegInFirebase = async function(doosnummer) {
+    const { doc, getDoc } = await import(
+        "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
+    );
+
+    const doosRef = doc(firebaseDb, "dozen", doosnummer);
+    const snapshot = await getDoc(doosRef);
+
+    if (!snapshot.exists()) {
+        throw new Error("De doos bestaat niet in Firebase.");
+    }
+
+    const doosData = snapshot.data();
+    const producten = doosData.producten || [];
+
+    return {
+        aantalProducten: producten.length
+    };
+};
+    window.bevestigDoosLeegmakenInFirebase = async function(doosnummer) {
+    const { doc, updateDoc } = await import(
+        "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
+    );
+
+    const doosRef = doc(firebaseDb, "dozen", doosnummer);
+
+    await updateDoc(doosRef, {
+        producten: [],
+        locatie: "",
         updated_at: new Date().toISOString()
     });
 };
