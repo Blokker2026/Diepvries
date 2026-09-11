@@ -3577,18 +3577,22 @@ async function saveBox() {
         alert("Vul eerst een doosnummer in.");
         return;
     }
-    if (nieuweDoosModus) {
+ if (nieuweDoosModus) {
 
-    const { data: bestaandeNieuweDoos, error: controleFout } = await voorraadDb
-        .from("dozen")
-        .select("doosnummer")
-        .eq("doosnummer", boxId)
-        .maybeSingle();
+    let bestaandeNieuweDoos = null;
 
-    if (controleFout) {
+    try {
+        const dozen = await window.haalDozenUitFirebase();
+
+        bestaandeNieuweDoos =
+            (dozen || []).find(
+                doos => doos.doosnummer === boxId
+            ) || null;
+
+    } catch (error) {
         alert(
             "Het doosnummer kon niet worden gecontroleerd:\n\n" +
-            controleFout.message
+            error.message
         );
         return;
     }
