@@ -1937,47 +1937,7 @@ async function ruimLegeProductenOp() {
     // Niet meer nodig: lege producten worden direct in Firebase verwerkt.
     return;
 }
-
-    for (const product of (producten || [])) {
-
-        const houdtGewichtBij =
-            product.gewicht !== null;
-
-        const houdtPortiesBij =
-            product.porties !== null;
-
-        const gewichtIsLeeg =
-            !houdtGewichtBij || Number(product.gewicht) <= 0;
-
-        const portiesZijnLeeg =
-            !houdtPortiesBij || Number(product.porties) <= 0;
-
-        const volledigOp =
-            (houdtGewichtBij || houdtPortiesBij) &&
-            gewichtIsLeeg &&
-            portiesZijnLeeg;
-
-        if (!volledigOp) {
-            continue;
-        }
-
-        const { error: deleteFout } = await voorraadDb
-            .from("Producten")
-            .delete()
-            .eq("id", product.id);
-
-        if (deleteFout) {
-            console.log(
-                "Leeg product kon niet automatisch worden verwijderd:",
-                deleteFout
-            );
-        }
-    }
-}
-
-
-
-
+   
 async function openProductWijzigen() {
 
     showScreen("productWijzigenScreen");
