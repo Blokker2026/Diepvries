@@ -1943,18 +1943,17 @@ async function openProductWijzigen() {
     status.classList.remove("visible");
     status.innerHTML = "";
 
-    const { data: dozen, error } = await voorraadDb
-        .from("dozen")
-        .select("doosnummer, locatie")
-        .order("doosnummer", { ascending: true });
+    let dozen = [];
 
-    if (error) {
-        alert(
-            "De dozen konden niet worden geladen:\n\n" +
-            error.message
-        );
-        return;
-    }
+try {
+    dozen = await window.haalDozenUitFirebase();
+} catch (error) {
+    alert(
+        "De dozen konden niet worden geladen:\n\n" +
+        error.message
+    );
+    return;
+}
 
     (dozen || []).forEach(doos => {
 
@@ -2007,19 +2006,28 @@ async function laadProductenVoorWijzigen() {
         return;
     }
 
-    const { data: producten, error } = await voorraadDb
-        .from("Producten")
-        .select("id, Naam, gewicht, porties")
-        .eq("doosnummer", doosnummer)
-        .order("id", { ascending: true });
+  let producten = [];
 
-    if (error) {
-        alert(
-            "De producten konden niet worden geladen:\n\n" +
-            error.message
+try {
+    const dozen = await window.haalDozenUitFirebase();
+
+    const gekozenDoos =
+        (dozen || []).find(
+            doos => doos.doosnummer === doosnummer
         );
-        return;
-    }
+
+    producten =
+        gekozenDoos && gekozenDoos.producten
+            ? gekozenDoos.producten
+            : [];
+
+} catch (error) {
+    alert(
+        "De producten konden niet worden geladen:\n\n" +
+        error.message
+    );
+    return;
+}
 
     if (!producten || producten.length === 0) {
 
@@ -2029,13 +2037,12 @@ async function laadProductenVoorWijzigen() {
         return;
     }
 
-    producten.forEach(product => {
-
+   producten.forEach((product, index) => {
         const option =
             document.createElement("option");
 
         option.value =
-            String(product.id);
+    String(index);
 
         const gewichtTekst =
             product.gewicht === null
@@ -2061,47 +2068,54 @@ async function laadProductenVoorWijzigen() {
 
 async function laadProductVoorWijzigen() {
 
-    const productIdTekst =
-        document.getElementById("wijzigProduct").value;
+    const productIndexTekst =
+    document.getElementById("wijzigProduct").value;
 
-    const formulier =
-        document.getElementById("wijzigProductForm");
+if (productIndexTekst === "") {
+    formulier.style.display = "none";
+    return;
+}
 
-    const status =
-        document.getElementById("wijzigProductStatus");
+const productIndex =
+    Number(productIndexTekst);
 
-    status.classList.remove("visible");
-    status.innerHTML = "";
+const doosnummer =
+    document.getElementById("wijzigDoosnummer").value;
 
-    if (!productIdTekst) {
-        formulier.style.display = "none";
-        return;
-    }
+let product = null;
 
-    const productId =
-        Number(productIdTekst);
+try {
+    const dozen = await window.haalDozenUitFirebase();
 
-    const { data: product, error } = await voorraadDb
-        .from("Producten")
-        .select("id, Naam, doosnummer, porties, gewicht, invriesdatum, houdbaar_tot, notitie")
-        .eq("id", productId)
-        .maybeSingle();
-
-    if (error) {
-        alert(
-            "Het product kon niet worden geladen:\n\n" +
-            error.message
+    const gekozenDoos =
+        (dozen || []).find(
+            doos => doos.doosnummer === doosnummer
         );
-        formulier.style.display = "none";
-        return;
+
+    if (
+        gekozenDoos &&
+        gekozenDoos.producten &&
+        gekozenDoos.producten[productIndex]
+    ) {
+        product =
+            gekozenDoos.producten[productIndex];
     }
 
-    if (!product) {
-        alert("Het gekozen product bestaat niet meer.");
-        formulier.style.display = "none";
-        await laadProductenVoorWijzigen();
-        return;
-    }
+} catch (error) {
+    alert(
+        "Het product kon niet worden geladen:\n\n" +
+        error.message
+    );
+    formulier.style.display = "none";
+    return;
+}
+
+if (!product) {
+    alert("Het gekozen product bestaat niet meer.");
+    formulier.style.display = "none";
+    await laadProductenVoorWijzigen();
+    return;
+}
 
     document.getElementById("wijzigNaam").value =
         product.Naam || "";
@@ -2125,8 +2139,11 @@ async function laadProductVoorWijzigen() {
     document.getElementById("wijzigNotitie").value =
         product.notitie || "";
 
-    formulier.dataset.productId =
-        String(product.id);
+   formulier.dataset.productIndex =
+    String(productIndex);
+
+formulier.dataset.doosnummer =
+    doosnummer;
 
     formulier.style.display = "block";
 }
@@ -2137,13 +2154,20 @@ async function saveProductWijziging() {
     const formulier =
         document.getElementById("wijzigProductForm");
 
-    const productId =
-        Number(formulier.dataset.productId);
+   const productIndex =
+    Number(formulier.dataset.productIndex);
 
-    if (!Number.isInteger(productId)) {
-        alert("Kies eerst een product.");
-        return;
-    }
+const doosnummer =
+    formulier.dataset.doosnummer;
+
+   if (
+    !Number.isInteger(productIndex) ||
+    productIndex < 0 ||
+    !doosnummer
+) {
+    alert("Kies eerst een product.");
+    return;
+}
 
     const naam =
         document.getElementById("wijzigNaam").value.trim();
@@ -2201,26 +2225,56 @@ async function saveProductWijziging() {
         return;
     }
 
-    const { data: gewijzigdeRijen, error } = await voorraadDb
-        .from("Producten")
-        .update({
-            Naam: naam,
-            porties: porties,
-            gewicht: gewicht,
-            invriesdatum: invriesdatum || null,
-            houdbaar_tot: houdbaarTot || null,
-            notitie: notitie
-        })
-        .eq("id", productId)
-        .select("id, Naam, porties, gewicht");
+   let gekozenDoos = null;
+let nieuweProducten = [];
 
-    if (error) {
-        alert(
-            "Het product kon niet worden gewijzigd:\n\n" +
-            error.message
+try {
+    const dozen = await window.haalDozenUitFirebase();
+
+    gekozenDoos =
+        (dozen || []).find(
+            doos => doos.doosnummer === doosnummer
         );
+
+    if (
+        !gekozenDoos ||
+        !gekozenDoos.producten ||
+        !gekozenDoos.producten[productIndex]
+    ) {
+        alert("Het gekozen product bestaat niet meer.");
         return;
     }
+
+    nieuweProducten =
+        [...gekozenDoos.producten];
+
+    nieuweProducten[productIndex] = {
+        ...nieuweProducten[productIndex],
+        Naam: naam,
+        porties: porties,
+        gewicht: gewicht,
+        invriesdatum: invriesdatum || null,
+        houdbaar_tot: houdbaarTot || null,
+        notitie: notitie
+    };
+
+    await window.slaDoosOokOpInFirebase(
+        doosnummer,
+        gekozenDoos.locatie || "",
+        gekozenDoos.notitie || "",
+        nieuweProducten
+    );
+
+} catch (error) {
+    alert(
+        "Het product kon niet worden gewijzigd:\n\n" +
+        error.message
+    );
+    return;
+}
+
+const gewijzigd =
+    nieuweProducten[productIndex];
 
     if (!gewijzigdeRijen || gewijzigdeRijen.length !== 1) {
         alert(
