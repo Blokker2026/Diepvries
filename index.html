@@ -2992,16 +2992,29 @@ try {
         });
     });
 });
-const { data: zakjes, error: zakjesFout } = await voorraadDb
-    .from("Zakjes")
-    .select("*")
-    .order("id", { ascending: true });
+let zakjes = [];
 
-if (zakjesFout) {
+try {
+    const { collection, getDocs } = await import(
+        "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
+    );
+
+    const snapshot = await getDocs(
+        collection(firebaseDb, "zakjes")
+    );
+
+    snapshot.forEach(doc => {
+        zakjes.push({
+            id: doc.id,
+            ...doc.data()
+        });
+    });
+
+} catch (error) {
     loading.innerHTML =
         "Er ging iets mis bij het laden van de zakjes.";
 
-    console.log(zakjesFout);
+    console.error("Firebase zakjesfout:", error);
     return;
 }
     loading.style.display = "none";
