@@ -2971,17 +2971,16 @@ try {
     return;
 }
 
-    const { data: producten, error: productenFout } = await voorraadDb
-        .from("Producten")
-        .select("*");
+   const producten = [];
 
-    if (productenFout) {
-        loading.innerHTML =
-            "Er ging iets mis bij het laden van de producten.";
-
-        console.log(productenFout);
-        return;
-    }
+(dozen || []).forEach(doos => {
+    (doos.producten || []).forEach(product => {
+        producten.push({
+            ...product,
+            doosnummer: product.doosnummer || doos.doosnummer
+        });
+    });
+});
 const { data: zakjes, error: zakjesFout } = await voorraadDb
     .from("Zakjes")
     .select("*")
