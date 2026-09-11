@@ -2435,7 +2435,7 @@ if(!locatie){
     alert("Kies eerst een nieuwe locatie in de vriezer.");
     return;
 }
-
+    
     const {data:bestaand,error:ce}=await voorraadDb.from("Producten").select("id").eq("doosnummer",boxId).limit(1);
     if(ce){alert("De doos kon niet worden gecontroleerd:\n\n"+ce.message);return;}
     if(bestaand&&bestaand.length){alert("Deze doos is inmiddels niet meer leeg.");await openOpnieuwVullen();return;}
