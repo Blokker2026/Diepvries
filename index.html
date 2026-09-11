@@ -2493,21 +2493,17 @@ if (
 });
     }
     
-    const {error}=await voorraadDb.from("Producten").insert(producten);
-    if(error){alert("De producten konden niet worden opgeslagen:\n\n"+error.message);return;}
-
-    const { error: locatieFout } = await voorraadDb
-    .from("dozen")
-    .update({
-        locatie: locatie,
-        updated_at: new Date().toISOString()
-    })
-    .eq("doosnummer", boxId);
-
-if (locatieFout) {
+   try {
+    await window.slaDoosOokOpInFirebase(
+        boxId,
+        locatie,
+        gekozenDoos.notitie || "",
+        producten
+    );
+} catch (error) {
     alert(
-        "De nieuwe locatie kon niet worden opgeslagen:\n\n" +
-        locatieFout.message
+        "De doos kon niet opnieuw worden gevuld:\n\n" +
+        error.message
     );
     return;
 }
