@@ -3226,6 +3226,12 @@ if (
                             ? `<br>📝 ${escapeHtml(product.notitie)}`
                             : ""
                     }
+                    <br><br>
+<button
+    class="danger-button"
+    onclick="verwijderDoosProduct('${doos.doosnummer}', '${product.Naam}')">
+    🗑 PRODUCT VERWIJDEREN
+</button>
                 `;
 
                 productBlok.appendChild(productRegel);
@@ -3315,6 +3321,35 @@ if (
     lijst.appendChild(kaart);
 });
     });
+}
+    async function verwijderDoosProduct(doosnummer, productNaam) {
+    const zeker = confirm(
+        "Weet je zeker dat je dit product uit de doos wilt verwijderen?"
+    );
+
+    if (!zeker) {
+        return;
+    }
+
+    try {
+        await window.verwijderDoosProductUitFirebase(
+            doosnummer,
+            productNaam
+        );
+
+        await openVoorraad();
+
+    } catch (error) {
+        alert(
+            "Het product kon niet worden verwijderd:\n\n" +
+            error.message
+        );
+
+        console.error(
+            "Firebase product-verwijderfout:",
+            error
+        );
+    }
 }
 async function verwijderZakje(zakjeId) {
 
@@ -4282,7 +4317,37 @@ window.slaZakjeOokOpInFirebase = async function(zakje) {
             error.message
         );
     }
-};   
+}; 
+    window.verwijderDoosProductUitFirebase = async function(doosnummer, productNaam) {
+    const { doc, getDoc, updateDoc } = await import(
+        "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
+    );
+
+    const doosRef = doc(firebaseDb, "dozen", doosnummer);
+    const snapshot = await getDoc(doosRef);
+
+    if (!snapshot.exists()) {
+        throw new Error("De doos bestaat niet in Firebase.");
+    }
+
+    const doosData = snapshot.data();
+    const producten = doosData.producten || [];
+
+    const index = producten.findIndex(
+        product => product.Naam === productNaam
+    );
+
+    if (index === -1) {
+        throw new Error("Het product is niet gevonden in deze doos.");
+    }
+
+    producten.splice(index, 1);
+
+    await updateDoc(doosRef, {
+        producten: producten,
+        updated_at: new Date().toISOString()
+    });
+};
 </script>
 </body>
 </html>
