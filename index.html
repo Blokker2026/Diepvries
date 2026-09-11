@@ -1166,7 +1166,17 @@ console.log("Zakje fout:", error);
         );
         return;
     }
-
+ await window.slaZakjeOokOpInFirebase({
+    locatie: locatie,
+    naam: naam,
+    dierlijk_ingredient: soort || null,
+    verpakking: verpakking || null,
+    aantal: aantal,
+    gewicht: gewicht,
+    invriesdatum: invriesdatum || null,
+    houdbaar_tot: houdbaarTot || null,
+    notitie: notitie
+});
    alert("Los product is opgeslagen");
 
 
@@ -1174,6 +1184,7 @@ document
     .getElementById("zakjeStatus")
     .classList.add("visible");
 }
+       
 
 function openZoeken() {
     showScreen("zoekenScreen");
@@ -4184,6 +4195,42 @@ async function testSupabaseVerbinding() {
 
     return dozen;
 };
+    };
+
+window.slaZakjeOokOpInFirebase = async function(zakje) {
+    try {
+        const { collection, addDoc } = await import(
+            "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
+        );
+
+        await addDoc(
+            collection(firebaseDb, "zakjes"),
+            {
+                locatie: zakje.locatie || "",
+                naam: zakje.naam || "",
+                dierlijk_ingredient: zakje.dierlijk_ingredient || null,
+                verpakking: zakje.verpakking || null,
+                aantal: zakje.aantal ?? null,
+                gewicht: zakje.gewicht ?? null,
+                invriesdatum: zakje.invriesdatum || null,
+                houdbaar_tot: zakje.houdbaar_tot || null,
+                notitie: zakje.notitie || "",
+                updated_at: new Date().toISOString()
+            }
+        );
+
+        console.log("Zakje ook opgeslagen in Firebase:", zakje.naam);
+
+    } catch (error) {
+        console.error("Opslaan zakje in Firebase mislukt:", error);
+
+        alert(
+            "Het zakje is wel in Supabase opgeslagen, maar nog niet in Firebase.\n\n" +
+            error.message
+        );
+    }
+};
+
  window.slaDoosOokOpInFirebase = async function(boxId, locatie, doosNotitie, producten) {
     try {
         const { doc, setDoc } = await import(
