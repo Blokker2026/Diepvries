@@ -1479,30 +1479,27 @@ gevondenZakjes.forEach(zakje => {
     select.innerHTML =
         '<option value="">Kies een doos...</option>';
 
-    const { data: dozen, error: dozenFout } = await voorraadDb
-        .from("dozen")
-        .select("doosnummer, locatie")
-        .order("doosnummer", { ascending: true });
+   let dozen = [];
 
-    if (dozenFout) {
-        alert(
-            "De dozen konden niet worden geladen:\n\n" +
-            dozenFout.message
-        );
-        return;
-    }
+try {
+    dozen = await window.haalDozenUitFirebase();
+} catch (error) {
+    alert(
+        "De dozen konden niet worden geladen:\n\n" +
+        error.message
+    );
+    return;
+}
+   const producten = [];
 
-    const { data: producten, error: productenFout } = await voorraadDb
-        .from("Producten")
-        .select("doosnummer");
-
-    if (productenFout) {
-        alert(
-            "De producten konden niet worden gecontroleerd:\n\n" +
-            productenFout.message
-        );
-        return;
-    }
+(dozen || []).forEach(doos => {
+    (doos.producten || []).forEach(product => {
+        producten.push({
+            ...product,
+            doosnummer: product.doosnummer || doos.doosnummer
+        });
+    });
+});
 
     const gevuldeDozen =
         new Set((producten || []).map(product => product.doosnummer));
