@@ -1549,11 +1549,22 @@ try {
     status.classList.remove("visible");
     status.innerHTML = "";
 
-   const { data: producten, error } = await voorraadDb
-    .from("Producten")
-    .select("doosnummer");
+  let dozenGebruik = [];
+let producten = [];
 
-if (error) {
+try {
+    dozenGebruik = await window.haalDozenUitFirebase();
+
+    (dozenGebruik || []).forEach(doos => {
+        (doos.producten || []).forEach(product => {
+            producten.push({
+                ...product,
+                doosnummer: product.doosnummer || doos.doosnummer
+            });
+        });
+    });
+
+} catch (error) {
     alert(
         "De dozen konden niet worden geladen:\n\n" +
         error.message
@@ -1598,19 +1609,26 @@ async function laadProductenVoorGebruik() {
         return;
     }
 
-    const { data: producten, error } = await voorraadDb
-        .from("Producten")
-        .select("id, Naam, gewicht, porties")
-        .eq("doosnummer", doosnummer)
-        .order("id", { ascending: true });
+   let producten = [];
 
-    if (error) {
-        alert(
-            "De producten konden niet worden geladen:\n\n" +
-            error.message
-        );
-        return;
-    }
+try {
+    const dozen = await window.haalDozenUitFirebase();
+
+    const gekozenDoos =
+        (dozen || []).find(doos => doos.doosnummer === doosnummer);
+
+    producten =
+        gekozenDoos && gekozenDoos.producten
+            ? gekozenDoos.producten
+            : [];
+
+} catch (error) {
+    alert(
+        "De producten konden niet worden geladen:\n\n" +
+        error.message
+    );
+    return;
+}
 
     const geldigeProducten = [];
 
@@ -1660,8 +1678,7 @@ async function laadProductenVoorGebruik() {
         const option =
             document.createElement("option");
 
-        option.value = String(product.id);
-
+     option.value = String(producten.indexOf(product));
         const gewichtTekst =
             product.gewicht === null
                 ? "geen gewicht"
@@ -1686,26 +1703,23 @@ async function laadProductenVoorGebruik() {
 
 async function productGebruiken() {
 
-    const productIdTekst =
-        document.getElementById("gebruikProduct").value;
+    const productIndexTekst =
+    document.getElementById("gebruikProduct").value;
 
-    const gebruiktePortiesTekst =
-        document.getElementById("gebruikPorties").value.trim();
+const doosnummer =
+    document.getElementById("gebruikDoosnummer").value;
 
-    const gebruiktGewichtTekst =
-        document.getElementById("gebruikGewicht").value.trim();
+if (productIndexTekst === "" || !doosnummer) {
+    alert("Kies eerst een doos en een product.");
+    return;
+}
 
-    if (!productIdTekst) {
-        alert("Kies eerst een product.");
-        return;
-    }
+const productIndex = Number(productIndexTekst);
 
-    const productId = Number(productIdTekst);
-
-    if (!Number.isInteger(productId)) {
-        alert("Het gekozen product heeft geen geldig ID.");
-        return;
-    }
+if (!Number.isInteger(productIndex) || productIndex < 0) {
+    alert("Het gekozen product is niet geldig.");
+    return;
+}
 
     const gebruiktePorties =
         gebruiktePortiesTekst === ""
@@ -1735,25 +1749,36 @@ async function productGebruiken() {
         return;
     }
 
-    const { data: product, error: leesFout } = await voorraadDb
-        .from("Producten")
-        .select("id, Naam, doosnummer, gewicht, porties")
-        .eq("id", productId)
-        .maybeSingle();
+   let dozenGebruik = [];
+let gekozenDoos = null;
+let product = null;
 
-    if (leesFout) {
-        alert(
-            "Het product kon niet worden geladen:\n\n" +
-            leesFout.message
+try {
+    dozenGebruik = await window.haalDozenUitFirebase();
+
+    gekozenDoos =
+        (dozenGebruik || []).find(
+            doos => doos.doosnummer === doosnummer
         );
+
+    if (!gekozenDoos) {
+        alert("De gekozen doos bestaat niet meer.");
         return;
     }
 
-    if (!product) {
-        alert("Het gekozen product bestaat niet meer in de voorraad.");
-        await laadProductenVoorGebruik();
-        return;
-    }
+    const productenInDoos =
+        gekozenDoos.producten || [];
+
+    product =
+        productenInDoos[productIndex] || null;
+
+} catch (error) {
+    alert(
+        "Het product kon niet worden geladen:\n\n" +
+        error.message
+    );
+    return;
+}
 
     const huidigGewicht =
         product.gewicht === null
