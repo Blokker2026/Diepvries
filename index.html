@@ -3704,19 +3704,23 @@ async function saveBox() {
     // 2. CONTROLEREN OF DOOS BESTAAT
     // -----------------------------
 
-    const { data: bestaandeDoos, error: zoekFout } = await voorraadDb
-        .from("dozen")
-        .select("*")
-        .eq("doosnummer", boxId)
-        .maybeSingle();
+   let bestaandeDoos = null;
 
-    if (zoekFout) {
-        alert(
-            "De doos kon niet worden gecontroleerd:\n\n" +
-            zoekFout.message
-        );
-        return;
-    }
+try {
+    const dozen = await window.haalDozenUitFirebase();
+
+    bestaandeDoos =
+        (dozen || []).find(
+            doos => doos.doosnummer === boxId
+        ) || null;
+
+} catch (error) {
+    alert(
+        "De doos kon niet worden gecontroleerd:\n\n" +
+        error.message
+    );
+    return;
+}
 
 
     // -----------------------------
@@ -3744,60 +3748,6 @@ async function saveBox() {
 
     } else {
 
-        const { error: insertFout } = await voorraadDb
-            .from("dozen")
-            .insert({
-                doosnummer: boxId,
-                locatie: locatie,
-                notitie: doosNotitie
-            });
-
-        if (insertFout) {
-            alert(
-                "De doos kon niet worden opgeslagen:\n\n" +
-                insertFout.message
-            );
-            return;
-        }
-    }
-
-
-    // -----------------------------
-    // 4. OUDE PRODUCTEN VERWIJDEREN
-    // -----------------------------
-
-    const { error: deleteFout } = await voorraadDb
-        .from("Producten")
-        .delete()
-        .eq("doosnummer", boxId);
-
-    if (deleteFout) {
-        alert(
-            "De bestaande producten konden niet worden bijgewerkt:\n\n" +
-            deleteFout.message
-        );
-        return;
-    }
-
-
-    // -----------------------------
-    // 5. NIEUWE PRODUCTLIJST OPSLAAN
-    // -----------------------------
-
-    if (producten.length > 0) {
-
-        const { error: productFout } = await voorraadDb
-            .from("Producten")
-            .insert(producten);
-
-        if (productFout) {
-            alert(
-                "De producten konden niet worden opgeslagen:\n\n" +
-                productFout.message
-            );
-            return;
-        }
-    }
 
 await slaDoosOokOpInFirebase(
     boxId,
