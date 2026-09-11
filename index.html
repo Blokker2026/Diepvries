@@ -3368,34 +3368,33 @@ async function verwijderZakje(zakjeId) {
 }
     async function openDoos(doosnummer) {
      nieuweDoosModus = false;
-    const { data: doos, error: doosError } = await voorraadDb
-        .from("dozen")
-        .select("*")
-        .eq("doosnummer", doosnummer)
-        .single();
+  let doos = null;
+let producten = [];
 
-    if (doosError) {
-        alert(
-            "De doos kon niet worden geopend:\n\n" +
-            doosError.message
-        );
-        console.log(doosError);
+try {
+    const dozen = await window.haalDozenUitFirebase();
+
+    doos =
+        (dozen || []).find(
+            item => item.doosnummer === doosnummer
+        ) || null;
+
+    if (!doos) {
+        alert("De doos kon niet worden gevonden in Firebase.");
         return;
     }
 
-    const { data: producten, error: productError } = await voorraadDb
-        .from("Producten")
-        .select("*")
-        .eq("doosnummer", doosnummer);
+    producten =
+        doos.producten || [];
 
-    if (productError) {
-        alert(
-            "De producten konden niet worden geladen:\n\n" +
-            productError.message
-        );
-        console.log(productError);
-        return;
-    }
+} catch (error) {
+    alert(
+        "De doos kon niet worden geopend:\n\n" +
+        error.message
+    );
+    console.error("Firebase fout bij openen doos:", error);
+    return;
+}
 
     document.getElementById("boxId").value =
         doos.doosnummer;
