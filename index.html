@@ -1141,30 +1141,7 @@ async function saveNieuwZakje() {
             ? null
             : Number(gewichtWaarde);
 
-   const { data, error } = await voorraadDb
-    .from("Zakjes")
-    .insert({
-        locatie: locatie,
-        naam: naam,
-        dierlijk_ingredient: soort || null,
-        verpakking: verpakking || null,
-        aantal: aantal,
-        gewicht: gewicht,
-        invriesdatum: invriesdatum || null,
-        houdbaar_tot: houdbaarTot || null,
-        notitie: notitie
-    })
-    .select();
-
-console.log("Zakje data:", data);
-console.log("Zakje fout:", error);
-
-    if (error) {
-        alert(
-            "Het zakje kon niet worden opgeslagen:\n\n" +
-            error.message
-        );
-        return;
+          return;
     }
  await window.slaZakjeOokOpInFirebase({
     locatie: locatie,
