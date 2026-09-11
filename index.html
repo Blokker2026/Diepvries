@@ -1651,24 +1651,9 @@ try {
             gewichtIsLeeg &&
             portiesZijnLeeg;
 
-        if (volledigOp) {
-
-            const { error: verwijderFout } = await voorraadDb
-                .from("Producten")
-                .delete()
-                .eq("id", product.id);
-
-            if (verwijderFout) {
-                console.log(
-                    "Leeg product kon niet automatisch worden verwijderd:",
-                    verwijderFout
-                );
-
-                geldigeProducten.push(product);
-            }
-
-            continue;
-        }
+      if (volledigOp) {
+    continue;
+}
 
         geldigeProducten.push(product);
     }
@@ -1785,7 +1770,12 @@ try {
     );
     return;
 }
-
+if (!product) {
+    alert("Het gekozen product bestaat niet meer in de voorraad.");
+    await laadProductenVoorGebruik();
+    return;
+}
+    
     const huidigGewicht =
         product.gewicht === null
             ? null
@@ -1944,18 +1934,9 @@ try {
 
 
 async function ruimLegeProductenOp() {
-
-    const { data: producten, error } = await voorraadDb
-        .from("Producten")
-        .select("id, gewicht, porties");
-
-    if (error) {
-        console.log(
-            "Lege producten konden niet worden gecontroleerd:",
-            error
-        );
-        return;
-    }
+    // Niet meer nodig: lege producten worden direct in Firebase verwerkt.
+    return;
+}
 
     for (const product of (producten || [])) {
 
