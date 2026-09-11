@@ -1219,44 +1219,46 @@ function openZoeken() {
         return;
     }
 
-    const { data: producten, error: productFout } = await voorraadDb
-        .from("Producten")
-        .select("id, doosnummer, Naam, dierlijk_ingredient, porties, gewicht, houdbaar_tot");
+   let dozenVoorZoeken = [];
+let producten = [];
 
-    if (productFout) {
-        resultaten.innerHTML = `
-            <div class="card">
-                De producten konden niet worden geladen.
-            </div>
-        `;
-        console.log(productFout);
-        return;
-    }
-const { data: zakjes, error: zakjesFout } = await voorraadDb
-    .from("Zakjes")
-    .select("id, locatie, naam, dierlijk_ingredient, verpakking, aantal, gewicht, invriesdatum, houdbaar_tot, notitie");
-if (zakjesFout) {
+try {
+    dozenVoorZoeken = await window.haalDozenUitFirebase();
+
+    (dozenVoorZoeken || []).forEach(doos => {
+        (doos.producten || []).forEach(product => {
+            producten.push({
+                ...product,
+                doosnummer: product.doosnummer || doos.doosnummer
+            });
+        });
+    });
+
+} catch (error) {
+    resultaten.innerHTML = `
+        <div class="card">
+            De producten konden niet worden geladen.
+        </div>
+    `;
+
+    console.error("Firebase zoekfout producten:", error);
+    return;
+}
+let zakjes = [];
+
+try {
+    zakjes = await window.haalZakjesUitFirebase();
+} catch (error) {
     resultaten.innerHTML = `
         <div class="card">
             De losse zakjes konden niet worden geladen.
         </div>
     `;
-    console.log(zakjesFout);
+
+    console.error("Firebase zoekfout zakjes:", error);
     return;
 }
-    const { data: dozen, error: doosFout } = await voorraadDb
-        .from("dozen")
-        .select("doosnummer, locatie");
-
-    if (doosFout) {
-        resultaten.innerHTML = `
-            <div class="card">
-                De locaties konden niet worden geladen.
-            </div>
-        `;
-        console.log(doosFout);
-        return;
-    }
+   const dozen = dozenVoorZoeken;
 if (
     document.getElementById("zoekProduct").value
         .trim()
