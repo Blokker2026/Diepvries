@@ -4329,13 +4329,15 @@ window.slaZakjeOokOpInFirebase = async function(zakje) {
         console.log("Doos ook opgeslagen in Firebase:", boxId);
 
     } catch (error) {
-        console.error("Opslaan in Firebase mislukt:", error);
+    console.error("Opslaan in Firebase mislukt:", error);
 
-        alert(
-            "De doos is wel in Supabase opgeslagen, maar nog niet in Firebase.\n\n" +
-            error.message
-        );
-    }
+    alert(
+        "De doos is wel in Supabase opgeslagen, maar nog niet in Firebase.\n\n" +
+        error.message
+    );
+
+    throw error;
+}
 }; 
     window.verwijderDoosProductUitFirebase = async function(doosnummer, productNaam) {
     const { doc, getDoc, updateDoc } = await import(
