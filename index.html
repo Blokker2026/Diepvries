@@ -3577,30 +3577,28 @@ async function saveBox() {
         alert("Vul eerst een doosnummer in.");
         return;
     }
- if (nieuweDoosModus) {
-
-    let bestaandeNieuweDoos = null;
+if (nieuweDoosModus) {
 
     try {
-        const dozen = await window.haalDozenUitFirebase();
+        const { doc, getDoc } = await import(
+            "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
+        );
 
-        bestaandeNieuweDoos =
-            (dozen || []).find(
-                doos => doos.doosnummer === boxId
-            ) || null;
+        const doosRef = doc(firebaseDb, "dozen", boxId);
+        const snapshot = await getDoc(doosRef);
+
+        if (snapshot.exists()) {
+            alert(
+                "Dit doosnummer bestaat al.\n\n" +
+                "Kies een ander doosnummer voor een nieuwe doos."
+            );
+            return;
+        }
 
     } catch (error) {
         alert(
             "Het doosnummer kon niet worden gecontroleerd:\n\n" +
             error.message
-        );
-        return;
-    }
-
-    if (bestaandeNieuweDoos) {
-        alert(
-            "Dit doosnummer bestaat al.\n\n" +
-            "Kies een ander doosnummer voor een nieuwe doos."
         );
         return;
     }
