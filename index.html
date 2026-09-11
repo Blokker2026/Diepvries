@@ -3727,28 +3727,6 @@ try {
     // 3. DOOS TOEVOEGEN OF WIJZIGEN
     // -----------------------------
 
-    if (bestaandeDoos) {
-
-        const { error: updateFout } = await voorraadDb
-            .from("dozen")
-            .update({
-                locatie: locatie,
-                notitie: doosNotitie,
-                updated_at: new Date().toISOString()
-            })
-            .eq("doosnummer", boxId);
-
-        if (updateFout) {
-            alert(
-                "De doos kon niet worden gewijzigd:\n\n" +
-                updateFout.message
-            );
-            return;
-        }
-
-    } else {
-
-
 await slaDoosOokOpInFirebase(
     boxId,
     locatie,
