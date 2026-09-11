@@ -2490,11 +2490,11 @@ async function openDoosLeeg() {
     status.classList.remove("visible");
     status.innerHTML = "";
 
-   const { data: producten, error } = await voorraadDb
-    .from("Producten")
-    .select("doosnummer");
+   let dozen = [];
 
-if (error) {
+try {
+    dozen = await window.haalDozenUitFirebase();
+} catch (error) {
     alert(
         "De dozen konden niet worden geladen:\n\n" +
         error.message
@@ -2503,9 +2503,10 @@ if (error) {
 }
 
 const doosnummersMetVoorraad =
-    [...new Set((producten || []).map(p => p.doosnummer))]
-    .sort();
-
+    (dozen || [])
+        .filter(doos => doos.producten && doos.producten.length > 0)
+        .map(doos => doos.doosnummer)
+        .sort();
 doosnummersMetVoorraad.forEach(doosnummer => {
     const option = document.createElement("option");
 
@@ -2543,19 +2544,28 @@ async function laadDoosVoorLeegmaken() {
         return;
     }
 
-    const { data: producten, error } = await voorraadDb
-        .from("Producten")
-        .select("id, Naam, gewicht, porties")
-        .eq("doosnummer", doosnummer)
-        .order("id", { ascending: true });
+    let producten = [];
 
-    if (error) {
-        alert(
-            "De inhoud van de doos kon niet worden geladen:\n\n" +
-            error.message
+try {
+    const dozen = await window.haalDozenUitFirebase();
+
+    const gekozenDoos =
+        (dozen || []).find(
+            doos => doos.doosnummer === doosnummer
         );
-        return;
-    }
+
+    producten =
+        gekozenDoos && gekozenDoos.producten
+            ? gekozenDoos.producten
+            : [];
+
+} catch (error) {
+    alert(
+        "De inhoud van de doos kon niet worden geladen:\n\n" +
+        error.message
+    );
+    return;
+}
 
     inhoud.style.display = "block";
 
