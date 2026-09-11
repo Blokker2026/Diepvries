@@ -2442,9 +2442,35 @@ if(!locatie){
     return;
 }
     
-    const {data:bestaand,error:ce}=await voorraadDb.from("Producten").select("id").eq("doosnummer",boxId).limit(1);
-    if(ce){alert("De doos kon niet worden gecontroleerd:\n\n"+ce.message);return;}
-    if(bestaand&&bestaand.length){alert("Deze doos is inmiddels niet meer leeg.");await openOpnieuwVullen();return;}
+   let dozenControle = [];
+
+try {
+    dozenControle = await window.haalDozenUitFirebase();
+} catch (error) {
+    alert(
+        "De doos kon niet worden gecontroleerd:\n\n" +
+        error.message
+    );
+    return;
+}
+
+const gekozenDoos =
+    dozenControle.find(d => d.doosnummer === boxId);
+
+if (!gekozenDoos) {
+    alert("Deze doos bestaat niet meer in Firebase.");
+    await openOpnieuwVullen();
+    return;
+}
+
+if (
+    gekozenDoos.producten &&
+    gekozenDoos.producten.length > 0
+) {
+    alert("Deze doos is inmiddels niet meer leeg.");
+    await openOpnieuwVullen();
+    return;
+}
 
     const producten=[];
     for(const c of document.querySelectorAll("#opnieuwProductList .product-card")){
