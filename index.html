@@ -3339,18 +3339,24 @@ async function verwijderZakje(zakjeId) {
         return;
     }
 
-    const { error } = await voorraadDb
-        .from("Zakjes")
-        .delete()
-        .eq("id", zakjeId);
+   try {
+    const { doc, deleteDoc } = await import(
+        "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
+    );
 
-    if (error) {
-        alert(
-            "Het los product kon niet worden verwijderd:\n\n" +
-            error.message
-        );
-        return;
-    }
+    await deleteDoc(
+        doc(firebaseDb, "zakjes", zakjeId)
+    );
+
+} catch (error) {
+    alert(
+        "Het los product kon niet worden verwijderd:\n\n" +
+        error.message
+    );
+
+    console.error("Firebase verwijderfout:", error);
+    return;
+}
 
     await openVoorraad();
 }
