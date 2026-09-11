@@ -2343,15 +2343,21 @@ async function openOpnieuwVullen() {
     document.getElementById("opnieuwProductList").innerHTML = "";
     document.getElementById("opnieuwStatus").classList.remove("visible");
 
-    const {data: dozen, error:e1} = await voorraadDb.from("dozen")
-        .select("doosnummer, locatie, notitie").order("doosnummer", {ascending:true});
-    if(e1){ alert("De dozen konden niet worden geladen:\n\n"+e1.message); return; }
+   let dozen = [];
 
-    const {data: producten, error:e2} = await voorraadDb.from("Producten").select("doosnummer");
-    if(e2){ alert("De producten konden niet worden gecontroleerd:\n\n"+e2.message); return; }
+try {
+    dozen = await window.haalDozenUitFirebase();
+} catch (error) {
+    alert(
+        "De dozen konden niet worden geladen:\n\n" +
+        error.message
+    );
+    return;
+}
 
-    const bezet = new Set((producten||[]).map(p=>p.doosnummer));
-    (dozen||[]).filter(d=>!bezet.has(d.doosnummer)).forEach(d=>{
+(dozen || [])
+    .filter(d => !d.producten || d.producten.length === 0)
+    .forEach(d => {
         const o=document.createElement("option");
         o.value=d.doosnummer;
        o.textContent=d.doosnummer;
