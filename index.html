@@ -2276,17 +2276,7 @@ try {
 const gewijzigd =
     nieuweProducten[productIndex];
 
-    if (!gewijzigdeRijen || gewijzigdeRijen.length !== 1) {
-        alert(
-            "Supabase heeft geen productregel gewijzigd."
-        );
-        return;
-    }
-
-    const gewijzigd =
-        gewijzigdeRijen[0];
-
-    const gewichtTekst =
+        const gewichtTekst =
         gewijzigd.gewicht === null
             ? "niet bijgehouden"
             : gewijzigd.gewicht + " gram";
