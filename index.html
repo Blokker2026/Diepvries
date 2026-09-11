@@ -2700,33 +2700,44 @@ async function openBijnaVerlopen() {
 
     lijst.innerHTML = "";
 
-    const { data: producten, error } = await voorraadDb
-        .from("Producten")
-        .select("id, doosnummer, Naam, houdbaar_tot")
-        .not("houdbaar_tot", "is", null)
-        .order("houdbaar_tot", { ascending: true });
-const { data: losseProducten, error: losseProductenFout } =
-    await voorraadDb
-        .from("Zakjes")
-        .select("id, locatie, naam, houdbaar_tot")
-        .not("houdbaar_tot", "is", null)
-        .order("houdbaar_tot", { ascending: true });
-    if (losseProductenFout) {
+    let producten = [];
+let losseProducten = [];
 
+try {
+    const dozen = await window.haalDozenUitFirebase();
+
+    (dozen || []).forEach(doos => {
+        (doos.producten || []).forEach(product => {
+
+            if (product.houdbaar_tot) {
+                producten.push({
+                    ...product,
+                    doosnummer:
+                        product.doosnummer || doos.doosnummer
+                });
+            }
+        });
+    });
+
+    losseProducten =
+        await window.haalZakjesUitFirebase();
+
+    losseProducten =
+        (losseProducten || []).filter(
+            product => product.houdbaar_tot
+        );
+
+} catch (error) {
     loading.innerHTML =
-        "De houdbaarheidsdatums van losse producten konden niet worden geladen.";
+        "De houdbaarheidsdatums konden niet worden geladen.";
 
-    console.log(losseProductenFout);
+    console.error(
+        "Firebase fout bij houdbaarheidsdatums:",
+        error
+    );
+
     return;
 }
-    if (error) {
-
-        loading.innerHTML =
-            "De houdbaarheidsdatums konden niet worden geladen.";
-
-        console.log(error);
-        return;
-    }
 
     const vandaag = new Date();
     vandaag.setHours(0, 0, 0, 0);
