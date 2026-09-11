@@ -1709,10 +1709,16 @@ async function productGebruiken() {
 const doosnummer =
     document.getElementById("gebruikDoosnummer").value;
 
+    const gebruiktePortiesTekst =
+    document.getElementById("gebruikPorties").value.trim();
+
+const gebruiktGewichtTekst =
+    document.getElementById("gebruikGewicht").value.trim();
 if (productIndexTekst === "" || !doosnummer) {
     alert("Kies eerst een doos en een product.");
     return;
 }
+    
 
 const productIndex = Number(productIndexTekst);
 
@@ -1861,28 +1867,20 @@ try {
     const status =
         document.getElementById("gebruikStatus");
 
+   try {
+    const nieuweProducten =
+        [...(gekozenDoos.producten || [])];
+
     if (moetVerwijderen) {
 
-        const { data: verwijderdeRijen, error: deleteFout } = await voorraadDb
-            .from("Producten")
-            .delete()
-            .eq("id", productId)
-            .select("id, Naam");
+        nieuweProducten.splice(productIndex, 1);
 
-        if (deleteFout) {
-            alert(
-                "Het lege product kon niet worden verwijderd:\n\n" +
-                deleteFout.message
-            );
-            return;
-        }
-
-        if (!verwijderdeRijen || verwijderdeRijen.length !== 1) {
-            alert(
-                "Het product is leeg, maar Supabase heeft geen productregel verwijderd."
-            );
-            return;
-        }
+        await window.slaDoosOokOpInFirebase(
+            doosnummer,
+            gekozenDoos.locatie || "",
+            gekozenDoos.notitie || "",
+            nieuweProducten
+        );
 
         status.innerHTML =
             "🗑️ PRODUCT VERWIJDERD<br><br>" +
@@ -1893,52 +1891,45 @@ try {
 
     } else {
 
-        const { data: gewijzigdeRijen, error: updateFout } = await voorraadDb
-            .from("Producten")
-            .update({
-                gewicht: nieuwGewicht,
-                porties: nieuwePorties
-            })
-            .eq("id", productId)
-            .select("id, Naam, gewicht, porties");
+        nieuweProducten[productIndex] = {
+            ...product,
+            gewicht: nieuwGewicht,
+            porties: nieuwePorties
+        };
 
-        if (updateFout) {
-            alert(
-                "De voorraad kon niet worden aangepast:\n\n" +
-                updateFout.message
-            );
-            return;
-        }
-
-        if (!gewijzigdeRijen || gewijzigdeRijen.length !== 1) {
-            alert(
-                "Supabase heeft geen productregel gewijzigd.\n\n" +
-                "Controleer het UPDATE-beleid van de tabel Producten."
-            );
-            return;
-        }
-
-        const gewijzigdProduct =
-            gewijzigdeRijen[0];
+        await window.slaDoosOokOpInFirebase(
+            doosnummer,
+            gekozenDoos.locatie || "",
+            gekozenDoos.notitie || "",
+            nieuweProducten
+        );
 
         const gewichtTekst =
-            gewijzigdProduct.gewicht === null
+            nieuwGewicht === null
                 ? "Niet bijgehouden"
-                : gewijzigdProduct.gewicht + " gram";
+                : nieuwGewicht + " gram";
 
         const portiesTekst =
-            gewijzigdProduct.porties === null
+            nieuwePorties === null
                 ? "Niet bijgehouden"
-                : gewijzigdProduct.porties;
+                : nieuwePorties;
 
         status.innerHTML =
             "✅ WIJZIGING OPGESLAGEN<br><br>" +
-            "Product: " + (gewijzigdProduct.Naam || "Product") + "<br>" +
+            "Product: " + (product.Naam || "Product") + "<br>" +
             "Nieuw gewicht: " + gewichtTekst + "<br>" +
             "Resterende porties: " + portiesTekst;
 
         status.classList.add("visible");
     }
+
+} catch (error) {
+    alert(
+        "De voorraad kon niet worden aangepast:\n\n" +
+        error.message
+    );
+    return;
+}
 
     document.getElementById("gebruikPorties").value = "";
     document.getElementById("gebruikGewicht").value = "";
