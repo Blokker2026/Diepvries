@@ -460,24 +460,6 @@ font-weight: 700;
      
 <!-- gewone knoppen van Voorraad hierboven -->
 
- <button class="main-button" onclick="testFirebaseVerbinding()">
-    <div class="icon">🔥</div>
-    <div>
-        <div class="button-title">Firebase testen</div>
-        <div class="button-description">
-            Controleer de verbinding met Firestore
-        </div>
-    </div>
-</button>
-    <button class="main-button" onclick="testFirebaseSchrijven()">
-    <div class="icon">✍️</div>
-    <div>
-        <div class="button-title">Firebase schrijven testen</div>
-        <div class="button-description">
-            Schrijf een testregel naar Firestore
-        </div>
-    </div>
-</button>
     
    <div class="footer">VoorraadBlox • versie 1.2</div>
 </div>
@@ -3611,14 +3593,15 @@ async function saveBox() {
 if (nieuweDoosModus) {
 
     try {
-        const { doc, getDoc } = await import(
-            "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
-        );
+        const dozen =
+            await window.haalDozenUitFirebase();
 
-        const doosRef = doc(firebaseDb, "dozen", boxId);
-        const snapshot = await getDoc(doosRef);
+        const bestaatAl =
+            (dozen || []).some(
+                doos => doos.doosnummer === boxId
+            );
 
-        if (snapshot.exists()) {
+        if (bestaatAl) {
             alert(
                 "Dit doosnummer bestaat al.\n\n" +
                 "Kies een ander doosnummer voor een nieuwe doos."
@@ -3634,6 +3617,7 @@ if (nieuweDoosModus) {
         return;
     }
 }
+    
 
     const locatie =
         document.getElementById("location").value;
