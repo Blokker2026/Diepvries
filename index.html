@@ -3308,7 +3308,7 @@ if (
                 <button
             class="danger-button"
             style="margin-top:16px;"
-            onclick="verwijderZakje(${zakje.id})">
+            onclick="verwijderZakje('${zakje.id}')">
             🗑️ LOS PRODUCT VERWIJDEREN
         </button>
     `;
@@ -3355,24 +3355,15 @@ async function verwijderZakje(zakjeId) {
         return;
     }
 
-   try {
-    const { doc, deleteDoc } = await import(
-        "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
-    );
-
-    await deleteDoc(
-        doc(firebaseDb, "zakjes", zakjeId)
-    );
-
-} catch (error) {
-    alert(
-        "Het los product kon niet worden verwijderd:\n\n" +
-        error.message
-    );
-
-    console.error("Firebase verwijderfout:", error);
-    return;
-}
+    try {
+        await window.verwijderZakjeUitFirebase(zakjeId);
+    } catch (error) {
+        alert(
+            "Het los product kon niet worden verwijderd:\n\n" +
+            error.message
+        );
+        return;
+    }
 
     await openVoorraad();
 }
@@ -4210,6 +4201,17 @@ window.slaZakjeOokOpInFirebase = async function(zakje) {
     throw error;
 }
 }; 
+
+    window.verwijderZakjeUitFirebase = async function(zakjeId) {
+    const { doc, deleteDoc } = await import(
+        "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
+    );
+
+    await deleteDoc(
+        doc(firebaseDb, "zakjes", zakjeId)
+    );
+};
+    
     window.verwijderDoosProductUitFirebase = async function(doosnummer, productNaam) {
     const { doc, getDoc, updateDoc } = await import(
         "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
