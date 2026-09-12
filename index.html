@@ -796,7 +796,7 @@ font-weight: 700;
         onclick="saveNieuwZakje()">
         💾 LOS PRODUCT OPSLAAN
     </button>
-
+<div id="losProductStatus" class="save-status"></div>
     <div id="zakjeStatus" class="status">
         ✅ los product opgeslagen
     </div>
@@ -1134,9 +1134,7 @@ async function saveNieuwZakje() {
     houdbaar_tot: houdbaarTot || null,
     notitie: notitie
 });
-   alert("Los product is opgeslagen");
-
-
+ 
 document
     .getElementById("zakjeStatus")
     .classList.add("visible");
