@@ -4027,24 +4027,21 @@ function generateQRCodes() {
    
 </script>
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-   import {
+ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+
+import {
     getAuth,
     signInWithEmailAndPassword,
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-    import {
-    getAuth,
-    signInWithEmailAndPassword,
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-    import {
-        getFirestore,
-        collection,
-        getDocs,
-        query,
-        limit
-    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+import {
+    getFirestore,
+    collection,
+    getDocs,
+    query,
+    limit
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDbIGJWR7Ky632Ln50gnuSaQEy3AL6TMsY",
