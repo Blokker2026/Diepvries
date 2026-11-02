@@ -322,7 +322,41 @@ textarea {
 <body>
 
 <div class="app">
+<div id="loginScreen" class="screen">
 
+    <div class="header">
+        <div class="logo">🧊</div>
+        <h1>VoorraadBlox</h1>
+        <div class="subtitle">Inloggen</div>
+    </div>
+
+    <div class="card">
+
+        <label>E-mailadres</label>
+        <input
+            id="loginEmail"
+            type="email"
+            autocomplete="email"
+        >
+
+        <label>Wachtwoord</label>
+        <input
+            id="loginPassword"
+            type="password"
+            autocomplete="current-password"
+        >
+
+        <button
+            class="primary-button"
+            onclick="loginVoorraadBlox()">
+            🔐 INLOGGEN
+        </button>
+
+        <div id="loginMelding" class="status"></div>
+
+    </div>
+
+</div>
 <!-- STARTSCHERM -->
 
 <div id="homeScreen" class="screen active">
@@ -3994,6 +4028,16 @@ function generateQRCodes() {
 </script>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+   import {
+    getAuth,
+    signInWithEmailAndPassword,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+    import {
+    getAuth,
+    signInWithEmailAndPassword,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
     import {
         getFirestore,
         collection,
@@ -4011,9 +4055,48 @@ function generateQRCodes() {
         appId: "1:124375160633:web:f751fdae01c827c320bae8"
     };
 
-    const firebaseApp = initializeApp(firebaseConfig);
-    const firebaseDb = getFirestore(firebaseApp);
+  const firebaseApp = initializeApp(firebaseConfig);
+const firebaseDb = getFirestore(firebaseApp);
+const firebaseAuth = getAuth(firebaseApp);
+window.loginVoorraadBlox = async function() {
 
+    const email =
+        document.getElementById("loginEmail").value.trim();
+
+    const password =
+        document.getElementById("loginPassword").value;
+
+    const melding =
+        document.getElementById("loginMelding");
+
+    try {
+        await signInWithEmailAndPassword(
+            firebaseAuth,
+            email,
+            password
+        );
+
+        melding.classList.remove("visible");
+        document.getElementById("loginPassword").value = "";
+
+        showScreen("homeScreen");
+
+    } catch (error) {
+        melding.textContent =
+            "Inloggen mislukt. Controleer e-mailadres en wachtwoord.";
+        melding.classList.add("visible");
+    }
+};
+
+onAuthStateChanged(firebaseAuth, (user) => {
+
+    if (user) {
+        showScreen("homeScreen");
+    } else {
+        showScreen("loginScreen");
+    }
+
+});
     window.testFirebaseVerbinding = async function() {
         try {
             const testQuery = query(
