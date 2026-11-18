@@ -455,6 +455,16 @@ textarea {
     </div>
 </button>
 
+<button class="main-button" onclick="openDoosVerwijderen()">
+    <div class="icon">🗑️</div>
+    <div>
+        <div class="button-title">Doos verwijderen</div>
+        <div class="button-description">
+            Verwijder een doos definitief uit de voorraad
+        </div>
+    </div>
+</button>
+
 <div style="
     text-align: center;
    color: #2563eb;
@@ -971,6 +981,49 @@ font-weight: 700;
     </div>
 
     <div id="doosLeegStatus" class="status"></div>
+
+</div>
+
+<!-- SCHERM: DOOS VERWIJDEREN -->
+<div id="doosVerwijderenScreen" class="screen">
+
+    <button class="back-button" onclick="goHome()">
+        ← Terug
+    </button>
+
+    <h2 class="title">🗑️ Doos verwijderen</h2>
+
+    <div class="help">
+        Kies de doos die je definitief wilt verwijderen.
+        De doos en alle bijbehorende producten
+        worden uit de voorraad verwijderd.
+        Dit kan niet ongedaan worden gemaakt.
+    </div>
+
+    <div class="card">
+        <label for="doosVerwijderenNummer">
+            Doosnummer
+        </label>
+
+        <select id="doosVerwijderenNummer">
+            <option value="">Kies een doos...</option>
+        </select>
+
+        <div id="doosVerwijderenInhoud"
+             style="display:none;margin-top:8px;">
+        </div>
+
+        <button
+            id="doosVerwijderenKnop"
+            class="danger-button"
+            onclick="verwijderDoosDefinitief()"
+            style="display:none;margin-top:18px;">
+            🗑️ DOOS DEFINITIEF VERWIJDEREN
+        </button>
+    </div>
+
+    <div id="doosVerwijderenStatus"
+         class="status"></div>
 
 </div>
 
@@ -2501,6 +2554,146 @@ if (
        producten.length+" product(en) toegevoegd.<br>Nieuwe locatie: "+escapeHtml(locatie)+".";
     st.classList.add("visible");
     document.getElementById("opnieuwProductGebied").style.display="none";
+}
+
+async function openDoosVerwijderen() {
+    showScreen("doosVerwijderenScreen");
+
+    const selectie = document.getElementById("doosVerwijderenNummer");
+    const inhoud = document.getElementById("doosVerwijderenInhoud");
+    const knop = document.getElementById("doosVerwijderenKnop");
+    const status = document.getElementById("doosVerwijderenStatus");
+
+    selectie.innerHTML = '<option value="">Kies een doos...</option>';
+    inhoud.innerHTML = "";
+    inhoud.style.display = "none";
+    knop.style.display = "none";
+    status.innerHTML = "";
+
+    try {
+        const dozen = await window.haalDozenUitFirebase();
+
+        dozen.forEach(doos => {
+            const optie = document.createElement("option");
+            optie.value = doos.doosnummer;
+            optie.textContent = doos.doosnummer;
+            selectie.appendChild(optie);
+        });
+
+        selectie.onchange = () => {
+            const doos = dozen.find(
+                d => d.doosnummer === selectie.value
+            );
+
+            knop.style.display = "none";
+            inhoud.replaceChildren();
+            inhoud.style.display = "none";
+
+            if (!doos) return;
+
+            const producten = Array.isArray(doos.producten)
+                ? doos.producten
+                : [];
+
+            const titel = document.createElement("strong");
+            titel.textContent = "Inhoud van doos " + doos.doosnummer;
+            inhoud.appendChild(titel);
+
+            const lijst = document.createElement("ul");
+
+            if (producten.length === 0) {
+                const item = document.createElement("li");
+                item.textContent = "Geen producten aanwezig";
+                lijst.appendChild(item);
+            } else {
+                producten.forEach(product => {
+                    const item = document.createElement("li");
+                    item.textContent = typeof product === "string"
+                        ? product
+                        : (product.naam || product.Naam || "Onbekend product");
+                    lijst.appendChild(item);
+                });
+            }
+
+            inhoud.appendChild(lijst);
+            inhoud.style.display = "block";
+            knop.style.display = "block";
+        };
+
+    } catch (error) {
+        status.textContent = "Fout bij ophalen dozen: " + error.message;
+        status.classList.add("visible");
+    }
+}
+
+async function verwijderDoosDefinitief() {
+    const selectie = document.getElementById("doosVerwijderenNummer");
+    const doosnummer = selectie.value;
+    const status = document.getElementById("doosVerwijderenStatus");
+    const knop = document.getElementById("doosVerwijderenKnop");
+
+    if (!doosnummer) {
+        alert("Selecteer eerst een doos.");
+        return;
+    }
+
+    const bevestiging = prompt(
+        "LET OP!\n\n" +
+        "Je gaat doos " + doosnummer +
+        " definitief verwijderen.\n\n" +
+        "Typ het doosnummer om te bevestigen:"
+    );
+
+    if (bevestiging !== doosnummer) {
+        alert("Verwijderen geannuleerd.");
+        return;
+    }
+
+    knop.disabled = true;
+
+    try {
+        const { doc, getDoc, deleteDoc } = await import(
+            "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
+        );
+
+        const doosRef = doc(firebaseDb, "dozen", doosnummer);
+        const snapshot = await getDoc(doosRef);
+
+        if (!snapshot.exists()) {
+            throw new Error("Deze doos bestaat niet meer in Firebase.");
+        }
+
+        await deleteDoc(doosRef);
+
+        status.textContent =
+            "Doos " + doosnummer + " is verwijderd uit Firebase.";
+        status.classList.add("visible");
+
+selectie.value = "";
+localStorage.removeItem("voorraadbox_" + doosnummer);
+
+try {
+    await openDoosVerwijderen();
+} catch (verversFout) {
+    console.warn("Dozenlijst verversen mislukt:", verversFout);
+}
+
+        
+   
+status.textContent = "✅ Doos " + doosnummer +
+    " is definitief verwijderd.";
+status.classList.add("visible");
+
+alert("Doos " + doosnummer + " is definitief verwijderd.");
+
+
+    } catch (error) {
+        status.textContent = "Verwijderen mislukt: " + error.message;
+        status.classList.add("visible");
+        alert("De doos kon niet worden verwijderd: " + error.message);
+    } finally {
+        knop.disabled = false;
+    }
 }
 
 async function openDoosLeeg() {
