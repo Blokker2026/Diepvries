@@ -2652,18 +2652,9 @@ async function verwijderDoosDefinitief() {
     knop.disabled = true;
 
     try {
-        const { doc, getDoc, deleteDoc } = await import(
-            "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
-        );
+        
+await window.verwijderDoosUitFirebase(doosnummer);
 
-        const doosRef = doc(firebaseDb, "dozen", doosnummer);
-        const snapshot = await getDoc(doosRef);
-
-        if (!snapshot.exists()) {
-            throw new Error("Deze doos bestaat niet meer in Firebase.");
-        }
-
-        await deleteDoc(doosRef);
 
         status.textContent =
             "Doos " + doosnummer + " is verwijderd uit Firebase.";
@@ -4484,7 +4475,22 @@ window.slaZakjeOokOpInFirebase = async function(zakje) {
         doc(firebaseDb, "zakjes", zakjeId)
     );
 };
-    
+ 
+window.verwijderDoosUitFirebase = async function(doosnummer) {
+    const { doc, deleteDoc, getDoc } = await import(
+        "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
+    );
+
+    const doosRef = doc(firebaseDb, "dozen", doosnummer);
+    const snapshot = await getDoc(doosRef);
+
+    if (!snapshot.exists()) {
+        throw new Error("Deze doos bestaat niet meer in Firebase.");
+    }
+
+    await deleteDoc(doosRef);
+};
+   
     window.verwijderDoosProductUitFirebase = async function(doosnummer, productNaam) {
     const { doc, getDoc, updateDoc } = await import(
         "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js"
